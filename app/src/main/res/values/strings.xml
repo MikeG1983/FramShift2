@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">FrameShift</string>
+    <string name="current_week_placeholder">January 1970</string>
+    <string name="previous_week_placeholder">&lt;&lt;</string>
+    <string name="next_week_placeholder">&gt;&gt;</string>
+    <string-array name="days_array">
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+        <item>Sun</item>
+    </string-array>
+</resources>
