@@ -36,6 +36,8 @@ public class CalendarView extends Fragment {
     private TextView currentWeek;
     private CalendarAdapter calendarAdapter;
     private static long idCounter = 0;
+    private GridView shiftGrid;
+    private ShiftAdapter shiftAdapter;
 
     //constructor
     public CalendarView() {
@@ -56,11 +58,12 @@ public class CalendarView extends Fragment {
         final RelativeLayout calendarHeaderLayout = (RelativeLayout)calendarLayout.findViewById(R.id.calendar_header);
         final GridView calendarDayGrid = (GridView)calendarLayout.findViewById(R.id.calendar_days_grid);
         final GestureDetector swipeDetector = new GestureDetector(getActivity(), new SwipeGesture(getActivity()));
-        final GridView shiftGrid = (GridView)calendarLayout.findViewById(R.id.shift_grid);
+        shiftGrid = (GridView)calendarLayout.findViewById(R.id.shift_grid);
         calendarSwitcher = (ViewSwitcher)calendarLayout.findViewById(R.id.calendar_switcher);
         currentWeek = (TextView)calendarLayout.findViewById(R.id.current_week);
         // create a new calendar adapter, and pass it the context and the calendar
         calendarAdapter = new CalendarAdapter(getActivity(), calendar);
+        shiftAdapter = new ShiftAdapter(getActivity(), calendar);
         // I think this sets the month in the title
         updateCurrentWeek();
         // set the buttons to variables and set the event listeners for the buttons and the day
@@ -73,7 +76,7 @@ public class CalendarView extends Fragment {
         //Set the adapter for the calendar days grid
         calendarDayGrid.setAdapter(calendarAdapter);
         //TODO set the adapter for the shift grid
-//        shiftGrid.setAdapter(calendarAdapter);
+        shiftGrid.setAdapter(shiftAdapter);
         //set a swipe listener for the body
         shiftGrid.setOnTouchListener(new OnTouchListener() {
             @Override
@@ -91,7 +94,7 @@ public class CalendarView extends Fragment {
         //call the calendar adapter method refresh days
         calendarAdapter.refreshDays();
         //call the shift adapter method refreshShifts
-//        shiftAdapter.refreshDays();
+        shiftAdapter.refreshDays();
         // sets the current week in the title
         // set the first day of the week for the locale (monday)
 
