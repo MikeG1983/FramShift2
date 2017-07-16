@@ -49,15 +49,16 @@
         android:layout_height="fill_parent"
         android:layout_below="@+id/calendar_header">
 
-        <RelativeLayout
+        <LinearLayout
             android:id="@+id/grid_holder"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_height="fill_parent"
+            android:orientation="vertical">
 
             <GridView
                 android:id="@+id/calendar_days_grid"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:background="@android:color/black"
                 android:horizontalSpacing="1dp"
                 android:numColumns="7"
@@ -65,15 +66,15 @@
 
             <GridView
                 android:id="@+id/shift_grid"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_below="@id/calendar_days_grid"
                 android:background="@android:color/darker_gray"
                 android:horizontalSpacing="1dp"
                 android:numColumns="7"
                 android:stretchMode="columnWidth"
                 android:verticalSpacing="1dp" />
-        </RelativeLayout>
+        </LinearLayout>
     </ViewSwitcher>
 
 </RelativeLayout>

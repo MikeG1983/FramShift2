@@ -54,8 +54,6 @@ public class CalendarView extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // set the layout views to variables +  get a gesture detector
         final RelativeLayout calendarLayout = (RelativeLayout)inflater.inflate(R.layout.calendar, null);
-        final RelativeLayout gridHolderLayout = (RelativeLayout)calendarLayout.findViewById(R.id.grid_holder);
-        final RelativeLayout calendarHeaderLayout = (RelativeLayout)calendarLayout.findViewById(R.id.calendar_header);
         final GridView calendarDayGrid = (GridView)calendarLayout.findViewById(R.id.calendar_days_grid);
         final GestureDetector swipeDetector = new GestureDetector(getActivity(), new SwipeGesture(getActivity()));
         shiftGrid = (GridView)calendarLayout.findViewById(R.id.shift_grid);

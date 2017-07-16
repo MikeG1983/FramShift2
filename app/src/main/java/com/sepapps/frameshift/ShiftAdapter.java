@@ -9,13 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Locale;
 
 public class ShiftAdapter extends BaseAdapter {
 
@@ -43,10 +42,10 @@ public class ShiftAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        final ArrayList item = shiftDays[position];
-        if (item != null) {
-            return shifts[position].id;
-        }
+//        final ArrayList item = shiftDays[position];
+//        if (item != null) {
+//            return shiftDays[position].id;
+//        }
         return -1;
     }
 
@@ -54,14 +53,18 @@ public class ShiftAdapter extends BaseAdapter {
     public View getView(int position, View view, ViewGroup parent) {
 
         if (view == null) {
-            view = inflater.inflate(R.layout.shift_item, null);
+            view = inflater.inflate(R.layout.shift_day, parent, false);
         }
+        int usedSpace = (int) MainActivity.deviceDensity * (92 + MainActivity.actionBarHeight);
+        int availableSpace = (MainActivity.deviceHeight - usedSpace);
+        view.setMinimumHeight(availableSpace);
         final LinearLayout day_cell = (LinearLayout) view.findViewById(R.id.day_cell);
         TextView startTime = new TextView(parent.getContext());
         startTime.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         startTime.setText("yeehaa!");
         day_cell.addView(startTime);
+        view.setBackgroundResource(R.drawable.normal_background);
 
         return view;
     }
