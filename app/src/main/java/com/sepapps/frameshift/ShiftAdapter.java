@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -55,16 +56,29 @@ public class ShiftAdapter extends BaseAdapter {
         if (view == null) {
             view = inflater.inflate(R.layout.shift_day, parent, false);
         }
+        //get the amount of screen height remaining for the shift cell
         int usedSpace = (int) MainActivity.deviceDensity * (92 + MainActivity.actionBarHeight);
         int availableSpace = (MainActivity.deviceHeight - usedSpace);
+        //set the height of the cell to the remaining space
         view.setMinimumHeight(availableSpace);
         final LinearLayout day_cell = (LinearLayout) view.findViewById(R.id.day_cell);
-        TextView startTime = new TextView(parent.getContext());
-        startTime.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-        startTime.setText("yeehaa!");
-        day_cell.addView(startTime);
-        view.setBackgroundResource(R.drawable.normal_background);
+        View normalShift = inflater.inflate(R.layout.normal_shift, parent, false);
+        TextView startTime = (TextView) normalShift.findViewById(R.id.start_time);
+        startTime.setText("14:00");
+        startTime.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        View rectangle = (View) normalShift.findViewById(R.id.rectangle);
+        rectangle.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 200));
+        TextView endTime = (TextView) normalShift.findViewById(R.id.end_time);
+        endTime.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        startTime.setText("22:00");
+
+        day_cell.addView(normalShift);
+//        TextView startTime = new TextView(parent.getContext());
+//        startTime.setLayoutParams(new LinearLayout.LayoutParams(
+//                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+//        startTime.setText("yeehaa!");
+//        day_cell.addView(startTime);
+//        view.setBackgroundResource(R.drawable.normal_background);
 
         return view;
     }
