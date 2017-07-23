@@ -5,7 +5,6 @@ package com.sepapps.frameshift;
  */
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Locale;
 
 import android.app.Fragment;
@@ -21,9 +20,6 @@ import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -41,10 +37,11 @@ public class CalendarView extends Fragment {
 
     //constructor
     public CalendarView() {
-        calendar = GregorianCalendar.getInstance();
-        calendar.setFirstDayOfWeek(Calendar.MONDAY);
-//        locale = Locale.getDefault();
         locale = Locale.UK;
+        calendar = Calendar.getInstance(locale);
+//        calendar.setFirstDayOfWeek(Calendar.MONDAY);
+//        locale = Locale.getDefault();
+
 
 
     }
@@ -62,7 +59,7 @@ public class CalendarView extends Fragment {
         // create a new calendar adapter, and pass it the context and the calendar
         calendarAdapter = new CalendarAdapter(getActivity(), calendar);
         shiftAdapter = new ShiftAdapter(getActivity(), calendar);
-        // I think this sets the month in the title
+        // This sets the month in the title
         updateCurrentWeek();
         // set the buttons to variables and set the event listeners for the buttons and the day
         //grid
@@ -82,17 +79,14 @@ public class CalendarView extends Fragment {
                 return swipeDetector.onTouchEvent(event);
             }
         });
-
-
-
-        return calendarLayout;
+  return calendarLayout;
     }
 
     protected void updateCurrentWeek() {
         //call the calendar adapter method refresh days
         calendarAdapter.refreshDays();
         //call the shift adapter method refreshShifts
-        shiftAdapter.refreshDays();
+        shiftAdapter.refreshShifts();
         // sets the current week in the title
         // set the first day of the week for the locale (monday)
 

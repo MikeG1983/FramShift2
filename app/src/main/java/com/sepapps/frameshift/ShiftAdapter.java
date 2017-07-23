@@ -53,37 +53,51 @@ public class ShiftAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View view, ViewGroup parent) {
 
-        if (view == null) {
-            view = inflater.inflate(R.layout.shift_day, parent, false);
-        }
-        //get the amount of screen height remaining for the shift cell
+  //get the amount of screen height remaining for the shift cell
         int usedSpace = (int) MainActivity.deviceDensity * (92 + MainActivity.actionBarHeight);
         int availableSpace = (MainActivity.deviceHeight - usedSpace);
         //set the height of the cell to the remaining space
-        view.setMinimumHeight(availableSpace);
-        final LinearLayout day_cell = (LinearLayout) view.findViewById(R.id.day_cell);
-        View normalShift = inflater.inflate(R.layout.normal_shift, parent, false);
-        TextView startTime = (TextView) normalShift.findViewById(R.id.start_time);
-        startTime.setText("14:00");
-        startTime.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        View rectangle = (View) normalShift.findViewById(R.id.rectangle);
-        rectangle.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 200));
-        TextView endTime = (TextView) normalShift.findViewById(R.id.end_time);
-        endTime.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        startTime.setText("22:00");
+        view = new LinearLayout(parent.getContext());
+        LinearLayout day_cell = (LinearLayout) view;
+        day_cell.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+        day_cell.setMinimumHeight(availableSpace);
+        day_cell.setPadding(10, 10, 10, 10);
+        day_cell.setBackgroundResource(R.drawable.normal_background);
+        day_cell.setClickable(false);
+        day_cell.setOrientation(LinearLayout.VERTICAL);
 
-        day_cell.addView(normalShift);
-//        TextView startTime = new TextView(parent.getContext());
-//        startTime.setLayoutParams(new LinearLayout.LayoutParams(
-//                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-//        startTime.setText("yeehaa!");
-//        day_cell.addView(startTime);
+
+
+
+
+//        LinearLayout day_cell = (LinearLayout) view.findViewById(R.id.day_cell);
+//        View normalShift = inflater.inflate(R.layout.normal_shift, parent, false);
+//        TextView startTime = (TextView) normalShift.findViewById(R.id.start_time);
+//        startTime.setText("14:00");
+//        startTime.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+//        View rectangle = (View) normalShift.findViewById(R.id.rectangle);
+//        rectangle.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 200));
+//        TextView endTime = (TextView) normalShift.findViewById(R.id.end_time);
+//        endTime.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+//        startTime.setText("22:00");
+//
+//        day_cell.addView(normalShift);
+        TextView startTime = new TextView(parent.getContext());
+        startTime.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        startTime.setText("14:00");
+        day_cell.addView(startTime);
+        TextView endTime = new TextView(parent.getContext());
+        endTime.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        endTime.setText("22:00");
+        day_cell.addView(endTime);
 //        view.setBackgroundResource(R.drawable.normal_background);
 
         return view;
     }
 
-    public final void refreshDays() {
+    public final void refreshShifts() {
         Calendar calCopy = (Calendar) (calendar.clone());
         // Set the day to the first day of the week
         //set the millisecond times for the start of week, and end of each day
@@ -135,6 +149,7 @@ public class ShiftAdapter extends BaseAdapter {
             //Get the start day and end day of the shift, if they
             //are the same then add the shift to one day, if they
             //are different then add the shift to each day, for display purposes.
+
             // for each day of the week
             for (int j = 0; j < (dayStarts.length - 1); j++) {
                 displayShiftStart = 0;

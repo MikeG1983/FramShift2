@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent"
     android:id="@+id/normal_shift"
-    >
-<TextView
-    android:id="@+id/start_time"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="" />
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical">
 
-    <View
+    <TextView
+        android:id="@+id/start_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_weight="1"/>
+
+    <ImageView
         android:id="@+id/rectangle"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:background="@drawable/normal_shift_rectangle">
-    </View>
+        android:src="@drawable/normal_shift_rectangle"
+        android:layout_weight="1"></ImageView>
+
     <TextView
         android:id="@+id/end_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="" />
-
-
+        android:text=""
+        android:layout_weight="1"/>
 
 
 </LinearLayout>
