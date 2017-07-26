@@ -27,7 +27,6 @@ import android.widget.ViewSwitcher;
 
 public class CalendarView extends Fragment {
     protected final Calendar calendar;
-    private final Locale locale;
     private ViewSwitcher calendarSwitcher;
     private TextView currentWeek;
     private CalendarAdapter calendarAdapter;
@@ -37,11 +36,8 @@ public class CalendarView extends Fragment {
 
     //constructor
     public CalendarView() {
-        locale = Locale.UK;
+        Locale locale = MainActivity.locale;
         calendar = Calendar.getInstance(locale);
-//        calendar.setFirstDayOfWeek(Calendar.MONDAY);
-//        locale = Locale.getDefault();
-
 
 
     }
@@ -50,12 +46,12 @@ public class CalendarView extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // set the layout views to variables +  get a gesture detector
-        final RelativeLayout calendarLayout = (RelativeLayout)inflater.inflate(R.layout.calendar, null);
-        final GridView calendarDayGrid = (GridView)calendarLayout.findViewById(R.id.calendar_days_grid);
+        final RelativeLayout calendarLayout = (RelativeLayout) inflater.inflate(R.layout.calendar, null);
+        final GridView calendarDayGrid = (GridView) calendarLayout.findViewById(R.id.calendar_days_grid);
         final GestureDetector swipeDetector = new GestureDetector(getActivity(), new SwipeGesture(getActivity()));
-        shiftGrid = (GridView)calendarLayout.findViewById(R.id.shift_grid);
-        calendarSwitcher = (ViewSwitcher)calendarLayout.findViewById(R.id.calendar_switcher);
-        currentWeek = (TextView)calendarLayout.findViewById(R.id.current_week);
+        shiftGrid = (GridView) calendarLayout.findViewById(R.id.shift_grid);
+        calendarSwitcher = (ViewSwitcher) calendarLayout.findViewById(R.id.calendar_switcher);
+        currentWeek = (TextView) calendarLayout.findViewById(R.id.current_week);
         // create a new calendar adapter, and pass it the context and the calendar
         calendarAdapter = new CalendarAdapter(getActivity(), calendar);
         shiftAdapter = new ShiftAdapter(getActivity(), calendar);
@@ -79,7 +75,7 @@ public class CalendarView extends Fragment {
                 return swipeDetector.onTouchEvent(event);
             }
         });
-  return calendarLayout;
+        return calendarLayout;
     }
 
     protected void updateCurrentWeek() {
@@ -91,7 +87,7 @@ public class CalendarView extends Fragment {
         // set the first day of the week for the locale (monday)
 
         // set the day to monday (this eventually will be read from user settings.
-        Calendar calCopy = (Calendar)(calendar.clone());
+        Calendar calCopy = (Calendar) (calendar.clone());
         calCopy.set(Calendar.DAY_OF_WEEK, calCopy.getFirstDayOfWeek());
         String title = "" + calCopy.get(Calendar.DAY_OF_MONTH) + " "
                 + calCopy.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.UK);
@@ -166,6 +162,7 @@ public class CalendarView extends Fragment {
             onPreviousWeek();
         }
     }
+
     private final class SwipeGesture extends SimpleOnGestureListener {
         private final int swipeMinDistance;
         private final int swipeThresholdVelocity;
@@ -175,12 +172,13 @@ public class CalendarView extends Fragment {
             swipeMinDistance = viewConfig.getScaledTouchSlop();
             swipeThresholdVelocity = viewConfig.getScaledMinimumFlingVelocity();
         }
+
         // if the swipe velocity is more than the threshhold then call the relevant method
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             if (e1.getX() - e2.getX() > swipeMinDistance && Math.abs(velocityX) > swipeThresholdVelocity) {
                 onNextWeek();
-            }  else if (e2.getX() - e1.getX() > swipeMinDistance && Math.abs(velocityX) > swipeThresholdVelocity) {
+            } else if (e2.getX() - e1.getX() > swipeMinDistance && Math.abs(velocityX) > swipeThresholdVelocity) {
                 onPreviousWeek();
             }
             return false;

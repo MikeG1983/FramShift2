@@ -52,23 +52,45 @@ public class ShiftAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
-
-  //get the amount of screen height remaining for the shift cell
+        //get the amount of screen height remaining for the shift cell
         int usedSpace = (int) MainActivity.deviceDensity * (92 + MainActivity.actionBarHeight);
         int availableSpace = (MainActivity.deviceHeight - usedSpace);
-        //set the height of the cell to the remaining space
-        view = new LinearLayout(parent.getContext());
-        LinearLayout day_cell = (LinearLayout) view;
+        //get the height of a single 10dp textview for this device
+        int pixelPerTextview = (int) (10 * MainActivity.deviceDensity);
+//        view = new LinearLayout(parent.getContext());
+//        LinearLayout day_cell = (LinearLayout) view;
+        LinearLayout day_cell = new LinearLayout(parent.getContext());
         day_cell.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+        //set the height of the cell to the remaining space
         day_cell.setMinimumHeight(availableSpace);
         day_cell.setPadding(10, 10, 10, 10);
         day_cell.setBackgroundResource(R.drawable.normal_background);
         day_cell.setClickable(false);
         day_cell.setOrientation(LinearLayout.VERTICAL);
-
-
-
-
+        ArrayList<Shift> thisDaysShifts = shiftDays[position];
+        for (Shift currentShift : thisDaysShifts){
+        Calendar shiftTimeHelper = Calendar.getInstance(MainActivity.locale);
+            //set the calendar helper object to the start time of the shift
+          shiftTimeHelper.setTimeInMillis(currentShift.getStartTime());
+            int startHour = shiftTimeHelper.get(Calendar.HOUR_OF_DAY);
+            int startMinute = shiftTimeHelper.get(Calendar.MINUTE);
+//            String stringStartHour = Integer.toString(startHour);
+//            String stringStartMinute = Integer.toString(startMinute);
+            String formattedStartHour = String.format("%02d", startHour);
+            String formattedStartMinute = String.format("%02d", startMinute);
+            String shiftStart =  formattedStartHour + ":" + formattedStartMinute;
+            //set the calendar helper object to the end time of the shift
+            shiftTimeHelper.setTimeInMillis(currentShift.getEndTime());
+            int endHour = shiftTimeHelper.get(Calendar.HOUR_OF_DAY);
+            int endMinute = shiftTimeHelper.get(Calendar.MINUTE);
+//            String stringEndHour = Integer.toString(endHour);
+//            String stringEndMinute = Integer.toString(endMinute);
+            String formattedEndHour = String.format("%02d", endHour);
+            String formattedEndMinute = String.format("%02d", endMinute);
+            String shiftEnd = formattedEndHour + ":" + formattedEndMinute;
+            normalShiftView currentShiftView = new normalShiftView(shiftStart, shiftEnd);
+            day_cell.addView(currentShiftView.getNormalShiftView(parent));
+        }
 
 //        LinearLayout day_cell = (LinearLayout) view.findViewById(R.id.day_cell);
 //        View normalShift = inflater.inflate(R.layout.normal_shift, parent, false);
@@ -82,18 +104,18 @@ public class ShiftAdapter extends BaseAdapter {
 //        startTime.setText("22:00");
 //
 //        day_cell.addView(normalShift);
-        TextView startTime = new TextView(parent.getContext());
-        startTime.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        startTime.setText("14:00");
-        day_cell.addView(startTime);
-        TextView endTime = new TextView(parent.getContext());
-        endTime.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        endTime.setText("22:00");
-        day_cell.addView(endTime);
+//        TextView startTime = new TextView(parent.getContext());
+//        startTime.setLayoutParams(new LinearLayout.LayoutParams(
+//                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+//        startTime.setText("14:00");
+//        day_cell.addView(startTime);
+//        TextView endTime = new TextView(parent.getContext());
+//        endTime.setLayoutParams(new LinearLayout.LayoutParams(
+//                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+//        endTime.setText("22:00");
+//        day_cell.addView(endTime);
 //        view.setBackgroundResource(R.drawable.normal_background);
-
+ view = day_cell;
         return view;
     }
 
@@ -153,7 +175,7 @@ public class ShiftAdapter extends BaseAdapter {
             // for each day of the week
             for (int j = 0; j < (dayStarts.length - 1); j++) {
                 displayShiftStart = 0;
-                shiftEnd = 0;
+                displayShiftEnd = 0;
                 //if the shift started before the start of this day, but finishes after it
                 if ((theShifts[i].getStartTime() < dayStarts[j]) && (theShifts[i].getEndTime() > dayStarts[j])) {
                     displayShiftStart = dayStarts[j];
@@ -171,8 +193,8 @@ public class ShiftAdapter extends BaseAdapter {
                     displayShiftEnd = (dayStarts[j + 1] - 1);
                 }
                 // if the shift is for this day, then add it to the array
-                if (shiftStart != 0 && shiftEnd != 0) {
-                    shiftDays[j].add(new Shift(shiftStart, shiftEnd, theShifts[i].getId()));
+                if (displayShiftStart != 0 && displayShiftEnd != 0) {
+                    shiftDays[j].add(new Shift(displayShiftStart, displayShiftEnd, theShifts[i].getId()));
                 }
             }
 
