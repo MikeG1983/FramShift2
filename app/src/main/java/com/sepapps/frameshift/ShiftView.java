@@ -11,10 +11,10 @@ import android.widget.TextView;
  * Created by ragebunny on 7/23/17.
  */
 
-public class normalShiftView {
+public class ShiftView {
     private String startTime, endTime;
 
-    public normalShiftView(String start, String end) {
+    public ShiftView(String start, String end) {
         startTime = start;
         endTime = end;
     }
@@ -29,7 +29,7 @@ public class normalShiftView {
         startTime.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         startTime.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
-        startTime.setGravity(View.TEXT_ALIGNMENT_CENTER);
+        startTime.setGravity(Gravity.CENTER);
         startTime.setText(this.startTime);
         normalShift.addView(startTime);
         View rectangle = new View(parent.getContext());
@@ -40,10 +40,30 @@ public class normalShiftView {
         endTime.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         endTime.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
-        endTime.setGravity(View.TEXT_ALIGNMENT_CENTER);
+        endTime.setGravity(Gravity.CENTER);
         endTime.setText(this.endTime);
         normalShift.addView(endTime);
         return normalShift;
+    }
+
+    /**
+     *
+     * @param parent
+     * @param pixelReduce This variable is for reducing the size of the whitespace if we need to
+     *                    account for TextViews. To keep the rectangle sizes correct.
+     * @return
+     */
+    public LinearLayout getWhitespaceShiftView(ViewGroup parent, int pixelReduce) {
+        LinearLayout whitespaceShift = new LinearLayout(parent.getContext());
+        whitespaceShift.setOrientation(LinearLayout.VERTICAL);
+        whitespaceShift.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        whitespaceShift.setLayoutParams(LLParams);
+        View rectangle = new View(parent.getContext());
+        rectangle.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (sizeOfView() - pixelReduce)));
+        rectangle.setBackgroundResource(R.drawable.normal_background);
+        whitespaceShift.addView(rectangle);
+             return whitespaceShift;
     }
 
     private Integer sizeOfView() {
@@ -63,6 +83,24 @@ public class normalShiftView {
         double durationPercentageOfDay = duration / (totalMinutesInDay / 100);
         int sizeOfView = (int) Math.floor(durationPercentageOfDay * (availableSpace / 100));
         return sizeOfView;
+    }
+
+    /**
+     * This method will return the amount of minutes gap that is needed to display a textView
+     * on this device, so that if the gap between 2 shifts is too small the app can display the text
+     * inside the rectangle
+     */
+    public static int getMinutesBreakpoint() {
+        int usedSpace = (int) MainActivity.deviceDensity * (92 + MainActivity.actionBarHeight);
+        int availableSpace = (MainActivity.deviceHeight - usedSpace);
+        int totalMinutesInDay = 1440;
+        int pixelPerTextview = (int) (10 * MainActivity.deviceDensity);
+        double onePercentOfAvailableSpace = availableSpace / 100.0;
+        //work out the percentage of the grid cell that a textview takes up
+        double textViewPercentage = (pixelPerTextview / (onePercentOfAvailableSpace) );
+        //work out the relative number of minutes if a cell = 24hours
+        int numberOfMinutes = (int) Math.floor(totalMinutesInDay * (textViewPercentage / 100));
+        return numberOfMinutes;
     }
 
 }

@@ -9,10 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -55,10 +52,11 @@ public class ShiftAdapter extends BaseAdapter {
         //get the amount of screen height remaining for the shift cell
         int usedSpace = (int) MainActivity.deviceDensity * (92 + MainActivity.actionBarHeight);
         int availableSpace = (MainActivity.deviceHeight - usedSpace);
-        //get the height of a single 10dp textview for this device
+        //amount of pixels taken up by a single textview
         int pixelPerTextview = (int) (10 * MainActivity.deviceDensity);
-//        view = new LinearLayout(parent.getContext());
-//        LinearLayout day_cell = (LinearLayout) view;
+        //get the relative number of minutes (based on cell height being 24 hours) needed to display
+        // a text view
+        int minutesPerTextview = ShiftView.getMinutesBreakpoint();
         LinearLayout day_cell = new LinearLayout(parent.getContext());
         day_cell.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         //set the height of the cell to the remaining space
@@ -68,54 +66,85 @@ public class ShiftAdapter extends BaseAdapter {
         day_cell.setClickable(false);
         day_cell.setOrientation(LinearLayout.VERTICAL);
         ArrayList<Shift> thisDaysShifts = shiftDays[position];
-        for (Shift currentShift : thisDaysShifts){
-        Calendar shiftTimeHelper = Calendar.getInstance(MainActivity.locale);
-            //set the calendar helper object to the start time of the shift
-          shiftTimeHelper.setTimeInMillis(currentShift.getStartTime());
-            int startHour = shiftTimeHelper.get(Calendar.HOUR_OF_DAY);
-            int startMinute = shiftTimeHelper.get(Calendar.MINUTE);
-//            String stringStartHour = Integer.toString(startHour);
-//            String stringStartMinute = Integer.toString(startMinute);
-            String formattedStartHour = String.format("%02d", startHour);
-            String formattedStartMinute = String.format("%02d", startMinute);
-            String shiftStart =  formattedStartHour + ":" + formattedStartMinute;
-            //set the calendar helper object to the end time of the shift
-            shiftTimeHelper.setTimeInMillis(currentShift.getEndTime());
-            int endHour = shiftTimeHelper.get(Calendar.HOUR_OF_DAY);
-            int endMinute = shiftTimeHelper.get(Calendar.MINUTE);
-//            String stringEndHour = Integer.toString(endHour);
-//            String stringEndMinute = Integer.toString(endMinute);
-            String formattedEndHour = String.format("%02d", endHour);
-            String formattedEndMinute = String.format("%02d", endMinute);
-            String shiftEnd = formattedEndHour + ":" + formattedEndMinute;
-            normalShiftView currentShiftView = new normalShiftView(shiftStart, shiftEnd);
-            day_cell.addView(currentShiftView.getNormalShiftView(parent));
-        }
+        int index = 0;
+        long shiftEndMillis = 0; //declare outside loop so I can access the previous shift end time.
+        String previousShiftEndFormatted = null; //declare outside loop so I can access the previous shift end time.
 
-//        LinearLayout day_cell = (LinearLayout) view.findViewById(R.id.day_cell);
-//        View normalShift = inflater.inflate(R.layout.normal_shift, parent, false);
-//        TextView startTime = (TextView) normalShift.findViewById(R.id.start_time);
-//        startTime.setText("14:00");
-//        startTime.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-//        View rectangle = (View) normalShift.findViewById(R.id.rectangle);
-//        rectangle.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 200));
-//        TextView endTime = (TextView) normalShift.findViewById(R.id.end_time);
-//        endTime.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-//        startTime.setText("22:00");
-//
-//        day_cell.addView(normalShift);
-//        TextView startTime = new TextView(parent.getContext());
-//        startTime.setLayoutParams(new LinearLayout.LayoutParams(
-//                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-//        startTime.setText("14:00");
-//        day_cell.addView(startTime);
-//        TextView endTime = new TextView(parent.getContext());
-//        endTime.setLayoutParams(new LinearLayout.LayoutParams(
-//                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-//        endTime.setText("22:00");
-//        day_cell.addView(endTime);
-//        view.setBackgroundResource(R.drawable.normal_background);
- view = day_cell;
+        if (thisDaysShifts.size() > 0) { //if there are some shifts for this day/cell
+            Calendar shiftTimeHelper = Calendar.getInstance(MainActivity.locale);
+            //get the millisecond time of midnight this morning (this calendar day of cell)
+            shiftTimeHelper.setTimeInMillis(thisDaysShifts.get(0).getStartTime());
+            shiftTimeHelper.set(Calendar.HOUR_OF_DAY, 0);
+            shiftTimeHelper.set(Calendar.MINUTE, 0);
+            long midnightThisMorning = shiftTimeHelper.getTimeInMillis();
+
+            //for each shift for this day (grid column)
+            for (int i = 0; i < thisDaysShifts.size(); i++) {
+                long previousShiftEnd = 0;
+                if (shiftEndMillis != 0) { //if this is not the first shift
+                    //get the end time of the previous shift.
+                    previousShiftEnd = shiftEndMillis;
+                }
+                boolean startTimeInsideRectangle = false; //set true if there is not enough space otherwise
+                boolean endTimeInsideRectangle = false; //set true if there is not enough space otherwise
+
+                // Get the times of the current shift
+
+                //set the calendar helper object to the start time of the shift
+                shiftTimeHelper.setTimeInMillis(thisDaysShifts.get(i).getStartTime());
+                int startHour = shiftTimeHelper.get(Calendar.HOUR_OF_DAY);
+                int startMinute = shiftTimeHelper.get(Calendar.MINUTE);
+                String formattedStartHour = String.format("%02d", startHour);
+                String formattedStartMinute = String.format("%02d", startMinute);
+                String shiftStart = formattedStartHour + ":" + formattedStartMinute;
+                //store the end time for special cases (for access in next loop iteration)
+                shiftEndMillis = thisDaysShifts.get(i).getEndTime();
+                //set the calendar helper object to the end time of the shift
+                shiftTimeHelper.setTimeInMillis(shiftEndMillis);
+                int endHour = shiftTimeHelper.get(Calendar.HOUR_OF_DAY);
+                int endMinute = shiftTimeHelper.get(Calendar.MINUTE);
+                String formattedEndHour = String.format("%02d", endHour);
+                String formattedEndMinute = String.format("%02d", endMinute);
+                String shiftEnd = formattedEndHour + ":" + formattedEndMinute;
+                previousShiftEndFormatted = shiftEnd;
+                //now we have the times of the shift, create any whitespace needed
+
+                //if this is the first shift of the day, then create whitespace up until it starts
+                if (previousShiftEnd == 0) {
+
+                    ShiftView whitespaceShift = new ShiftView("00:00", shiftStart);
+                    //if there is not enough space to display the start time
+                    if ((thisDaysShifts.get(i).getStartTime() - midnightThisMorning) < minutesPerTextview) {
+                        startTimeInsideRectangle = true;
+                    }
+                    day_cell.addView(whitespaceShift.getWhitespaceShiftView(parent, pixelPerTextview));
+                }
+                if (previousShiftEnd != 0) { //if this is not the first shift of the day
+                    ShiftView whitespaceShift = new ShiftView(previousShiftEndFormatted, shiftStart);
+                    if ((thisDaysShifts.get(i).getStartTime() - previousShiftEnd) < (minutesPerTextview*2)) {
+                        startTimeInsideRectangle = true;
+                    }
+                    if (startTimeInsideRectangle) {
+                        day_cell.addView(whitespaceShift.getWhitespaceShiftView(parent, (pixelPerTextview*2)));
+                    }
+                    else{
+                        day_cell.addView(whitespaceShift.getWhitespaceShiftView(parent, (0)));
+                                            }
+                }
+                //if there is another shift after this one
+                if (thisDaysShifts.size() > (i + 1)){
+                    long thisShiftEndTime = thisDaysShifts.get(i).getEndTime();
+                    long nextShiftStartTime = thisDaysShifts.get(i+1).getStartTime();
+                    //if there isnt enough room to display the textViews
+                if ((nextShiftStartTime - thisShiftEndTime) < (minutesPerTextview*2)){
+                    endTimeInsideRectangle = true;
+                }
+                }
+                ShiftView currentShiftView = new ShiftView(shiftStart, shiftEnd);
+                day_cell.addView(currentShiftView.getNormalShiftView(parent));
+            }
+        }
+        view = day_cell;
         return view;
     }
 
