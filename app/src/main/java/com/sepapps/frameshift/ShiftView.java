@@ -17,6 +17,7 @@ public class ShiftView {
     public ShiftView(String start, String end) {
         startTime = start;
         endTime = end;
+
     }
 
     public LinearLayout getNormalShiftView(ViewGroup parent) {
@@ -47,7 +48,6 @@ public class ShiftView {
     }
 
     /**
-     *
      * @param parent
      * @param pixelReduce This variable is for reducing the size of the whitespace if we need to
      *                    account for TextViews. To keep the rectangle sizes correct.
@@ -60,10 +60,14 @@ public class ShiftView {
         LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         whitespaceShift.setLayoutParams(LLParams);
         View rectangle = new View(parent.getContext());
-        rectangle.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (sizeOfView() - pixelReduce)));
+        int theViewHeight = sizeOfView() - pixelReduce;
+        if (theViewHeight < 0) {
+            theViewHeight = 0;
+        }
+        rectangle.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, theViewHeight));
         rectangle.setBackgroundResource(R.drawable.normal_background);
         whitespaceShift.addView(rectangle);
-             return whitespaceShift;
+        return whitespaceShift;
     }
 
     private Integer sizeOfView() {
@@ -97,10 +101,83 @@ public class ShiftView {
         int pixelPerTextview = (int) (10 * MainActivity.deviceDensity);
         double onePercentOfAvailableSpace = availableSpace / 100.0;
         //work out the percentage of the grid cell that a textview takes up
-        double textViewPercentage = (pixelPerTextview / (onePercentOfAvailableSpace) );
+        double textViewPercentage = (pixelPerTextview / (onePercentOfAvailableSpace));
         //work out the relative number of minutes if a cell = 24hours
         int numberOfMinutes = (int) Math.floor(totalMinutesInDay * (textViewPercentage / 100));
         return numberOfMinutes;
     }
+
+    public LinearLayout getNoStartTextShiftView(ViewGroup parent) {
+        LinearLayout noStartTextShift = new LinearLayout(parent.getContext());
+        noStartTextShift.setOrientation(LinearLayout.VERTICAL);
+        noStartTextShift.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        noStartTextShift.setLayoutParams(LLParams);
+        TextView startTime = new TextView(parent.getContext());
+        startTime.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, sizeOfView()));
+        startTime.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+        startTime.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+        startTime.setBackgroundResource(R.drawable.normal_shift_rectangle);
+        startTime.setText(this.startTime);
+        noStartTextShift.addView(startTime);
+        TextView endTime = new TextView(parent.getContext());
+        endTime.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        endTime.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+        endTime.setGravity(Gravity.CENTER);
+        endTime.setText(this.endTime);
+        noStartTextShift.addView(endTime);
+        return noStartTextShift;
+    }
+
+    public LinearLayout getNoEndTextShiftView(ViewGroup parent) {
+        LinearLayout normalShift = new LinearLayout(parent.getContext());
+        normalShift.setOrientation(LinearLayout.VERTICAL);
+        normalShift.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+        normalShift.setLayoutParams(LLParams);
+        TextView startTime = new TextView(parent.getContext());
+        startTime.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        startTime.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+        startTime.setGravity(Gravity.CENTER);
+        startTime.setText(this.startTime);
+        normalShift.addView(startTime);
+        TextView endTime = new TextView(parent.getContext());
+        endTime.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, sizeOfView()));
+        endTime.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+        endTime.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
+        endTime.setText(this.endTime);
+        endTime.setBackgroundResource(R.drawable.normal_shift_rectangle);
+        normalShift.addView(endTime);
+        return normalShift;
+    }
+
+    public LinearLayout getNoStartOrEndTextShiftView(ViewGroup parent) {
+        LinearLayout normalShift = new LinearLayout(parent.getContext());
+        normalShift.setOrientation(LinearLayout.VERTICAL);
+        normalShift.setBackgroundResource(R.drawable.normal_shift_rectangle);
+        LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, sizeOfView());
+        normalShift.setLayoutParams(LLParams);
+        TextView startTime = new TextView(parent.getContext());
+        startTime.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        startTime.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+        startTime.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+        startTime.setText(this.startTime);
+        normalShift.addView(startTime);
+        TextView endTime = new TextView(parent.getContext());
+        endTime.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+        endTime.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+        endTime.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
+
+        endTime.setText(this.endTime);
+        normalShift.addView(endTime);
+        return normalShift;
+    }
+
 
 }
