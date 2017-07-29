@@ -126,13 +126,13 @@ public class ShiftAdapter extends BaseAdapter {
                 }
                 if (previousShiftEnd != 0) { //if this is not the first shift of the day
                     ShiftView whitespaceShift = new ShiftView(previousShiftEndFormatted, shiftStart);
+                    //if there is not enough space between shift to display the textviews
                     if ((thisDaysShifts.get(i).getStartTime() - previousShiftEnd) < ((minutesPerTextview * 60000) * 2)) {
                         startTimeInsideRectangle = true;
+                        day_cell.addView(whitespaceShift.getWhitespaceShiftView(parent, 0));
                     }
-                    if (startTimeInsideRectangle) {
+                    else { //if there is enough space
                         day_cell.addView(whitespaceShift.getWhitespaceShiftView(parent, (pixelPerTextview * 2)));
-                    } else {
-                        day_cell.addView(whitespaceShift.getWhitespaceShiftView(parent, (0)));
                     }
                 }
                 //if there is another shift after this one
@@ -155,11 +155,11 @@ public class ShiftAdapter extends BaseAdapter {
                         //else if there isn't enough room for the textview
                         //but there is enough for some whitespace
                         endTimeInsideRectangle = true;
-                        ShiftView whitespaceShift = new ShiftView(previousShiftEndFormatted, "11:59");
+                        ShiftView whitespaceShift = new ShiftView(shiftEnd, "11:59");
                         day_cell.addView(whitespaceShift.getWhitespaceShiftView(parent, (0)));
                         //if there is enough room for the textview
                     } else if ((thisShiftEndTime + (minutesPerTextview * 60000)) < endOfDay) {
-                        ShiftView whitespaceShift = new ShiftView(previousShiftEndFormatted, "11:59");
+                        ShiftView whitespaceShift = new ShiftView(shiftEnd, "11:59");
                         day_cell.addView(whitespaceShift.getWhitespaceShiftView(parent, pixelPerTextview));
                     }
                 }
