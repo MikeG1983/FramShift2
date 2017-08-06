@@ -2,12 +2,15 @@ package com.sepapps.frameshift;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.lang.annotation.Target;
 
 /**
  * Created by ragebunny on 7/23/17.
@@ -48,16 +51,11 @@ public class ShiftView {
         rectangle.setBackgroundResource(R.drawable.normal_shift_rectangle);
         rectangle.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                AlertDialog alertDialog = new AlertDialog.Builder(v.getRootView().getContext()).create();
-                alertDialog.setTitle("Alert");
-                alertDialog.setMessage(String.valueOf(baseShiftId));
-                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
-                            }
-                        });
-                alertDialog.show();
+                Intent intent = new Intent(v.getRootView().getContext(), EnterShift.class);
+                intent.putExtra("startTime", baseShiftStart);
+                intent.putExtra("endTime", baseShiftEnd);
+                intent.putExtra("id", baseShiftId);
+                v.getRootView().getContext().startActivity(intent);
             }
         });
         normalShift.addView(rectangle);
