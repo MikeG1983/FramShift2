@@ -163,7 +163,7 @@ public class ShiftAdapter extends BaseAdapter {
                         day_cell.addView(whitespaceShift.getWhitespaceShiftView(parent, pixelPerTextview));
                     }
                 }
-                ShiftView currentShiftView = new ShiftView(shiftStart, shiftEnd);
+                ShiftView currentShiftView = new ShiftView(shiftStart, shiftEnd, thisDaysShifts.get(i).getStartTime(), thisDaysShifts.get(i).getEndTime(), thisDaysShifts.get(i).getId());
                 if (!startTimeInsideRectangle && !endTimeInsideRectangle) {
                     day_cell.addView(currentShiftView.getNormalShiftView(parent));
                 } else if (startTimeInsideRectangle && !endTimeInsideRectangle) {
@@ -206,7 +206,8 @@ public class ShiftAdapter extends BaseAdapter {
         calCopy.set(Calendar.HOUR_OF_DAY, 18);
         calCopy.set(Calendar.MINUTE, 0);
         long shiftEnd = calCopy.getTimeInMillis();
-        //create 6 dummy shifts
+        //create 4 dummy shifts (without ID, it will generate one, subsequently we can get the
+        //id from the database
         theShifts[0] = new Shift(shiftStart, shiftEnd);
         calCopy.set(Calendar.HOUR_OF_DAY, 18);
         calCopy.set(Calendar.MINUTE, 15);

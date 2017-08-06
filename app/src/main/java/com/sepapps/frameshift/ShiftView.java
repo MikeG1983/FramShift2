@@ -1,5 +1,7 @@
 package com.sepapps.frameshift;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -13,11 +15,19 @@ import android.widget.TextView;
 
 public class ShiftView {
     private String startTime, endTime;
+    private long baseShiftStart, baseShiftEnd, baseShiftId;
 
     public ShiftView(String start, String end) {
         startTime = start;
         endTime = end;
+            }
 
+    public ShiftView(String start, String end, long baseShiftStarting, long baseShiftEnding, long baseShiftIdentifier) {
+        startTime = start;
+        endTime = end;
+        baseShiftStart = baseShiftStarting;
+        baseShiftEnd = baseShiftEnding;
+        baseShiftId = baseShiftIdentifier;
     }
 
     public LinearLayout getNormalShiftView(ViewGroup parent) {
@@ -36,6 +46,20 @@ public class ShiftView {
         View rectangle = new View(parent.getContext());
         rectangle.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, sizeOfView()));
         rectangle.setBackgroundResource(R.drawable.normal_shift_rectangle);
+        rectangle.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                AlertDialog alertDialog = new AlertDialog.Builder(v.getRootView().getContext()).create();
+                alertDialog.setTitle("Alert");
+                alertDialog.setMessage(String.valueOf(baseShiftId));
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+            }
+        });
         normalShift.addView(rectangle);
         TextView endTime = new TextView(parent.getContext());
         endTime.setLayoutParams(new LinearLayout.LayoutParams(
