@@ -25,6 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
         android:layout_marginLeft="32dp"
+        android:onClick="loadCalendar"
         android:text="@android:string/cancel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent" />
@@ -37,7 +38,10 @@
         android:layout_marginLeft="30dp"
         android:layout_marginTop="16dp"
         android:onClick="setStartDate"
+        android:padding="5dp"
+        android:background="@drawable/textfield_background"
         android:textSize="16sp"
+        android:textColor="#FFFFFF"
         app:layout_constraintLeft_toLeftOf="@+id/startLabel"
         app:layout_constraintTop_toBottomOf="@+id/startLabel" />
 
@@ -48,7 +52,10 @@
         android:layout_marginLeft="30dp"
         android:layout_marginTop="16dp"
         android:onClick="setEndDate"
+        android:padding="5dp"
+        android:background="@drawable/textfield_background"
         android:textSize="16sp"
+        android:textColor="#FFFFFF"
         app:layout_constraintLeft_toLeftOf="@+id/endLabel"
         app:layout_constraintTop_toBottomOf="@+id/endLabel" />
 
@@ -58,8 +65,11 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="30dp"
         android:layout_marginTop="0dp"
+        android:padding="5dp"
         android:onClick="setStartTime"
         android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/textfield_background"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="@+id/startDate" />
 
@@ -69,8 +79,11 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="30dp"
         android:layout_marginTop="0dp"
+        android:padding="5dp"
         android:onClick="setEndTime"
         android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        android:background="@drawable/textfield_background"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="@+id/endDate" />
 
@@ -78,22 +91,23 @@
         android:id="@+id/endLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="0dp"
+        android:layout_marginLeft="30dp"
         android:layout_marginTop="43dp"
         android:text="End:"
         android:textSize="16sp"
-        app:layout_constraintLeft_toLeftOf="@+id/enterShiftTitle"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/startDate" />
 
     <TextView
         android:id="@+id/startLabel"
         android:layout_width="74dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="0dp"
+        android:layout_marginLeft="30dp"
         android:layout_marginTop="32dp"
         android:text="Start:"
+
         android:textSize="16sp"
-        app:layout_constraintLeft_toLeftOf="@+id/enterShiftTitle"
-        app:layout_constraintTop_toBottomOf="@+id/enterShiftTitle" />
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

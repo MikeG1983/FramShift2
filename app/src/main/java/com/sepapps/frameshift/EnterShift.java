@@ -2,6 +2,7 @@ package com.sepapps.frameshift;
 
 import android.app.Activity;
 import android.app.DialogFragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -32,27 +33,47 @@ public class EnterShift extends Activity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Intent intent = getIntent();
+        Long defaultLong = 0L;
+        Long startLong = intent.getLongExtra("startTime", defaultLong);
+        Long endLong = intent.getLongExtra("endTime", defaultLong);
         super.onCreate(savedInstanceState);
         Calendar c = Calendar.getInstance();
         setContentView(R.layout.activity_enter_shift);
-        //get the current date into the variables
+        //set the format for the text fields
         dayOfWeekFormat = new SimpleDateFormat("EEE", Locale.UK);
         dateFormat = new SimpleDateFormat("d MMMM yyyy", Locale.UK);
-        currentDayOfWeek = dayOfWeekFormat.format(c.getTime());
-        currentDate = dateFormat.format(c.getTime());
-        //set the current date as the initial values for the two date fields
-        TextView startDate = (TextView) findViewById(R.id.startDate);
-        startDate.setText(currentDayOfWeek + ", " + currentDate);
-        TextView endDate = (TextView) findViewById(R.id.endDate);
-        endDate.setText(currentDayOfWeek + ", " + currentDate);
-        //get the current time into the variables
         timeFormat = new SimpleDateFormat("HH:mm", Locale.UK);
-        currentTime = timeFormat.format(c.getTime());
-        //set the current time as the initial values for the two time fields
+        TextView startDate = (TextView) findViewById(R.id.startDate);
+        TextView endDate = (TextView) findViewById(R.id.endDate);
         TextView startTime = (TextView) findViewById(R.id.startTime);
-        startTime.setText(currentTime);
         TextView toTime = (TextView) findViewById(R.id.endTime);
-        toTime.setText(currentTime);
+        if (startLong != defaultLong) { //if editing an existing shift
+            //get the shift start time into the fields
+            c.setTimeInMillis(startLong);
+            currentDayOfWeek = dayOfWeekFormat.format(c.getTime());
+            currentDate = dateFormat.format(c.getTime());
+            startDate.setText(currentDayOfWeek + ", " + currentDate);
+            currentTime = timeFormat.format(c.getTime());
+            startTime.setText(currentTime);
+            c.setTimeInMillis(endLong);
+            currentDayOfWeek = dayOfWeekFormat.format(c.getTime());
+            currentDate = dateFormat.format(c.getTime());
+            endDate.setText(currentDayOfWeek + ", " + currentDate);
+            currentTime = timeFormat.format(c.getTime());
+            toTime.setText(currentTime);
+        } else {
+            currentDayOfWeek = dayOfWeekFormat.format(c.getTime());
+            currentDate = dateFormat.format(c.getTime());
+            //set the current date as the initial values for the two date fields
+            startDate.setText(currentDayOfWeek + ", " + currentDate);
+            endDate.setText(currentDayOfWeek + ", " + currentDate);
+            //get the current time into the variables
+            currentTime = timeFormat.format(c.getTime());
+            //set the current time as the initial values for the two time fields
+            startTime.setText(currentTime);
+            toTime.setText(currentTime);
+        }
 
     }
 
@@ -162,4 +183,8 @@ public class EnterShift extends Activity
 
     }
 
+    public void loadCalendar(View view) {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+    }
 }
