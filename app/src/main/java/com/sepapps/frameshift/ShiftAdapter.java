@@ -5,6 +5,7 @@ package com.sepapps.frameshift;
  */
 
 import android.content.Context;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,18 +50,19 @@ public class ShiftAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
-        //get the amount of screen height remaining for the shift cell
+         //get the amount of screen height remaining for the shift cell
         int usedSpace = (int) MainActivity.deviceDensity * (92 + MainActivity.actionBarHeight);
         int availableSpace = (MainActivity.deviceHeight - usedSpace);
-        //amount of pixels taken up by a single textview
-        int pixelPerTextview = (int) (10 * MainActivity.deviceDensity);
+        int textViewPadding = 4;
+        int textViewTextHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 10, MainActivity.metrics);
+        int pixelPerTextview = textViewPadding + textViewTextHeight;
         //get the relative number of minutes (based on cell height being 24 hours) needed to display
         // a text view
         int minutesPerTextview = ShiftView.getMinutesBreakpoint();
         LinearLayout day_cell = new LinearLayout(parent.getContext());
         day_cell.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         //set the height of the cell to the remaining space
-        day_cell.setMinimumHeight(availableSpace);
+        day_cell.setMinimumHeight((int) availableSpace);
         day_cell.setPadding(10, 10, 10, 10);
         day_cell.setBackgroundResource(R.drawable.normal_background);
         day_cell.setClickable(false);
@@ -88,6 +90,7 @@ public class ShiftAdapter extends BaseAdapter {
                 }
                 boolean startTimeInsideRectangle = false; //set true if there is not enough space otherwise
                 boolean endTimeInsideRectangle = false; //set true if there is not enough space otherwise
+                View endDayWhitespace = null;
 
                 // Get the times of the current shift
 
@@ -113,7 +116,7 @@ public class ShiftAdapter extends BaseAdapter {
                 //if this is the first shift of the day, then create whitespace up until it starts
                 if (previousShiftEnd == 0) {
                     if (shiftStart != "00:00") {
-                        ShiftView whitespaceShift = new ShiftView("00:00", shiftStart);
+                        ShiftView whitespaceShift = new ShiftView("00:00", shiftStart, midnightThisMorning, thisDaysShifts.get(i).getStartTime(), 0);
                         //if there is not enough space to display the start time
                         if ((thisDaysShifts.get(i).getStartTime() - minutesPerTextview < midnightThisMorning)) {
                             startTimeInsideRectangle = true;
@@ -125,16 +128,16 @@ public class ShiftAdapter extends BaseAdapter {
 
                 }
                 if (previousShiftEnd != 0) { //if this is not the first shift of the day
-                    ShiftView whitespaceShift = new ShiftView(previousShiftEndFormatted, shiftStart);
+                    ShiftView whitespaceShift = new ShiftView(previousShiftEndFormatted, shiftStart, thisDaysShifts.get(i - 1).getEndTime(), thisDaysShifts.get(i).getStartTime(), 0);
                     //if there is not enough space between shift to display the textviews
                     if ((thisDaysShifts.get(i).getStartTime() - previousShiftEnd) < ((minutesPerTextview * 60000) * 2)) {
                         startTimeInsideRectangle = true;
                         day_cell.addView(whitespaceShift.getWhitespaceShiftView(parent, 0));
-                    }
-                    else { //if there is enough space
+                    } else { //if there is enough space
                         day_cell.addView(whitespaceShift.getWhitespaceShiftView(parent, (pixelPerTextview * 2)));
                     }
                 }
+
                 //if there is another shift after this one
                 if (thisDaysShifts.size() > (i + 1)) {
                     long thisShiftEndTime = thisDaysShifts.get(i).getEndTime();
@@ -155,14 +158,16 @@ public class ShiftAdapter extends BaseAdapter {
                         //else if there isn't enough room for the textview
                         //but there is enough for some whitespace
                         endTimeInsideRectangle = true;
-                        ShiftView whitespaceShift = new ShiftView(shiftEnd, "11:59");
-                        day_cell.addView(whitespaceShift.getWhitespaceShiftView(parent, (0)));
+                        ShiftView whitespaceShift = new ShiftView(shiftEnd, "23:59", thisDaysShifts.get(i).getEndTime(), endOfDay, 0);
+//                        day_cell.addView(whitespaceShift.getWhitespaceShiftView(parent, (0)));
+                        endDayWhitespace = whitespaceShift.getWhitespaceShiftView(parent, (0));
                         //if there is enough room for the textview
                     } else if ((thisShiftEndTime + (minutesPerTextview * 60000)) < endOfDay) {
-                        ShiftView whitespaceShift = new ShiftView(shiftEnd, "11:59");
-                        day_cell.addView(whitespaceShift.getWhitespaceShiftView(parent, pixelPerTextview));
+                        ShiftView whitespaceShift = new ShiftView(shiftEnd, "23:59", thisDaysShifts.get(i).getEndTime(), endOfDay, 0);
+                        endDayWhitespace = whitespaceShift.getWhitespaceShiftView(parent, (pixelPerTextview));
                     }
                 }
+                //add the shift
                 ShiftView currentShiftView = new ShiftView(shiftStart, shiftEnd, thisDaysShifts.get(i).getStartTime(), thisDaysShifts.get(i).getEndTime(), thisDaysShifts.get(i).getId());
                 if (!startTimeInsideRectangle && !endTimeInsideRectangle) {
                     day_cell.addView(currentShiftView.getNormalShiftView(parent));
@@ -173,6 +178,9 @@ public class ShiftAdapter extends BaseAdapter {
                 } else if (startTimeInsideRectangle && endTimeInsideRectangle) {
                     day_cell.addView(currentShiftView.getNoStartOrEndTextShiftView(parent));
                 }
+                if (endDayWhitespace != null) { //if this is the last shift of the day
+                    day_cell.addView(endDayWhitespace);
+                                    }
                 previousShiftEndFormatted = shiftEnd;
             }
         }

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -25,6 +26,7 @@ public class EnterShift extends Activity
     private SimpleDateFormat timeFormat;
     private String currentDayOfWeek;
     private String currentDate;
+    private String edit;
     private String currentTime;
     private Date currentlySetFromDate;
     private Date currentlySetToDate;
@@ -37,6 +39,7 @@ public class EnterShift extends Activity
         Long defaultLong = 0L;
         Long startLong = intent.getLongExtra("startTime", defaultLong);
         Long endLong = intent.getLongExtra("endTime", defaultLong);
+        edit = intent.getStringExtra("edit");
         super.onCreate(savedInstanceState);
         Calendar c = Calendar.getInstance();
         setContentView(R.layout.activity_enter_shift);
@@ -48,7 +51,15 @@ public class EnterShift extends Activity
         TextView endDate = (TextView) findViewById(R.id.endDate);
         TextView startTime = (TextView) findViewById(R.id.startTime);
         TextView toTime = (TextView) findViewById(R.id.endTime);
-        if (startLong != defaultLong) { //if editing an existing shift
+        Button addEditButton = (Button) findViewById(R.id.saveButton);
+        addEditButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View ve) {
+                final View v = ve;
+                if (edit.equals("yes")) {
+                }
+            }
+        });
+
             //get the shift start time into the fields
             c.setTimeInMillis(startLong);
             currentDayOfWeek = dayOfWeekFormat.format(c.getTime());
@@ -62,20 +73,10 @@ public class EnterShift extends Activity
             endDate.setText(currentDayOfWeek + ", " + currentDate);
             currentTime = timeFormat.format(c.getTime());
             toTime.setText(currentTime);
-        } else {
-            currentDayOfWeek = dayOfWeekFormat.format(c.getTime());
-            currentDate = dateFormat.format(c.getTime());
-            //set the current date as the initial values for the two date fields
-            startDate.setText(currentDayOfWeek + ", " + currentDate);
-            endDate.setText(currentDayOfWeek + ", " + currentDate);
-            //get the current time into the variables
-            currentTime = timeFormat.format(c.getTime());
-            //set the current time as the initial values for the two time fields
-            startTime.setText(currentTime);
-            toTime.setText(currentTime);
-        }
 
     }
+
+
 
     public void setStartTime(View v) {
         TextView startTime = (TextView) findViewById(R.id.startTime);

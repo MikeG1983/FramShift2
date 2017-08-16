@@ -10,14 +10,15 @@ import android.util.DisplayMetrics;
 import java.util.Locale;
 
 public class MainActivity extends Activity {
-    public static int deviceHeight, deviceWidth, actionBarHeight, shiftGridCellHeight;
+    public static int deviceHeight, deviceWidth, actionBarHeight, shiftGridCellHeight, dayGridHeight, navBarHeight;
     public static float deviceDensity;
     public static Locale locale;
+    public static DisplayMetrics metrics;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         locale = Locale.UK;
-        DisplayMetrics metrics = new DisplayMetrics();
+        metrics = new DisplayMetrics();
         //get the screen dimensions
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         deviceHeight = metrics.heightPixels;

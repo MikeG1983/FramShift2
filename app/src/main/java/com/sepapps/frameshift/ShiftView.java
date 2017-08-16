@@ -25,16 +25,17 @@ public class ShiftView {
         endTime = end;
             }
 
-    public ShiftView(String start, String end, long baseShiftStarting, long baseShiftEnding, long baseShiftIdentifier) {
+    public ShiftView(String start, String end, long longShiftStarting, long longShiftEnding, long baseShiftIdentifier) {
         startTime = start;
         endTime = end;
-        baseShiftStart = baseShiftStarting;
-        baseShiftEnd = baseShiftEnding;
+        baseShiftStart = longShiftStarting;
+        baseShiftEnd = longShiftEnding;
         baseShiftId = baseShiftIdentifier;
     }
 
     public LinearLayout getNormalShiftView(ViewGroup parent) {
         LinearLayout normalShift = new LinearLayout(parent.getContext());
+        normalShift.setPadding(0,0,0,0);
         normalShift.setOrientation(LinearLayout.VERTICAL);
         normalShift.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
@@ -42,7 +43,9 @@ public class ShiftView {
         TextView startTime = new TextView(parent.getContext());
         startTime.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        startTime.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+        startTime.setTextSize(10);
+        startTime.setIncludeFontPadding(false);
+        startTime.setPadding(0, 2, 0, 2);
         startTime.setGravity(Gravity.CENTER);
         startTime.setText(this.startTime);
         normalShift.addView(startTime);
@@ -63,6 +66,7 @@ public class ShiftView {
                         intent.putExtra("startTime", baseShiftStart);
                         intent.putExtra("endTime", baseShiftEnd);
                         intent.putExtra("id", baseShiftId);
+                        intent.putExtra("edit", "yes");
                         v.getRootView().getContext().startActivity(intent);
                     }
                 });
@@ -81,7 +85,9 @@ public class ShiftView {
         TextView endTime = new TextView(parent.getContext());
         endTime.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        endTime.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+        endTime.setTextSize(10);
+        endTime.setIncludeFontPadding(false);
+        endTime.setPadding(0, 2, 0, 2);
         endTime.setGravity(Gravity.CENTER);
         endTime.setText(this.endTime);
         normalShift.addView(endTime);
@@ -98,6 +104,7 @@ public class ShiftView {
         LinearLayout whitespaceShift = new LinearLayout(parent.getContext());
         whitespaceShift.setOrientation(LinearLayout.VERTICAL);
         whitespaceShift.setGravity(Gravity.CENTER);
+        whitespaceShift.setPadding(0,0,0,0);
         LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         whitespaceShift.setLayoutParams(LLParams);
         View rectangle = new View(parent.getContext());
@@ -106,7 +113,7 @@ public class ShiftView {
             theViewHeight = 0;
         }
         rectangle.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, theViewHeight));
-        rectangle.setBackgroundResource(R.drawable.normal_background);
+        rectangle.setBackgroundResource(R.drawable.normal_background_test);
         rectangle.setOnClickListener(new View.OnClickListener() {
             public void onClick(View ve) {
                 final View v = ve;
@@ -121,6 +128,7 @@ public class ShiftView {
                         intent.putExtra("startTime", baseShiftStart);
                         intent.putExtra("endTime", baseShiftEnd);
                         intent.putExtra("id", baseShiftId);
+                        intent.putExtra("edit", "no");
                         v.getRootView().getContext().startActivity(intent);
                     }
                 });
@@ -142,8 +150,9 @@ public class ShiftView {
     private Integer sizeOfView() {
         //calculate the amount of space used
         int usedSpace = (int) MainActivity.deviceDensity * (92 + MainActivity.actionBarHeight);
-        int availableSpace = (MainActivity.deviceHeight - usedSpace);
-        int totalMinutesInDay = 1440;
+        int availableSpace = (MainActivity.deviceHeight - (usedSpace + 20));
+
+        int totalMinutesInDay = 1439;
         String[] startArray = this.startTime.split(":");
         int startHour = Integer.valueOf(startArray[0]);
         int startMinute = Integer.valueOf(startArray[1]);
@@ -153,8 +162,9 @@ public class ShiftView {
         int startMinuteOfDay = (startHour * 60) + startMinute;
         int endMinuteOfDay = (endHour * 60) + endMinute;
         int duration = endMinuteOfDay - startMinuteOfDay;
-        double durationPercentageOfDay = duration / (totalMinutesInDay / 100);
-        int sizeOfView = (int) Math.floor(durationPercentageOfDay * (availableSpace / 100));
+        double totalMinutesDividedBy100 = (double) totalMinutesInDay / 100;
+        double durationPercentageOfDay = duration / totalMinutesDividedBy100;
+        int sizeOfView = (int) Math.floor(durationPercentageOfDay * ((double) availableSpace / 100));
         return sizeOfView;
     }
 
@@ -165,7 +175,7 @@ public class ShiftView {
      */
     public static int getMinutesBreakpoint() {
         int usedSpace = (int) MainActivity.deviceDensity * (92 + MainActivity.actionBarHeight);
-        int availableSpace = (MainActivity.deviceHeight - usedSpace);
+        int availableSpace = (MainActivity.deviceHeight - (usedSpace + 20));
         int totalMinutesInDay = 1440;
         int pixelPerTextview = (int) (10 * MainActivity.deviceDensity);
         double onePercentOfAvailableSpace = availableSpace / 100.0;
@@ -180,12 +190,13 @@ public class ShiftView {
         LinearLayout noStartTextShift = new LinearLayout(parent.getContext());
         noStartTextShift.setOrientation(LinearLayout.VERTICAL);
         noStartTextShift.setGravity(Gravity.CENTER);
+        noStartTextShift.setPadding(0,0,0,0);
         LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         noStartTextShift.setLayoutParams(LLParams);
         TextView startTime = new TextView(parent.getContext());
         startTime.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, sizeOfView()));
-        startTime.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+        startTime.setTextSize(10); 
         startTime.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
         startTime.setBackgroundResource(R.drawable.normal_shift_rectangle);
         startTime.setText(this.startTime);
@@ -193,7 +204,9 @@ public class ShiftView {
         TextView endTime = new TextView(parent.getContext());
         endTime.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        endTime.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+        endTime.setTextSize(10);
+        endTime.setIncludeFontPadding(false);
+        endTime.setPadding(0, 2, 0, 2);
         endTime.setGravity(Gravity.CENTER);
         endTime.setText(this.endTime);
         noStartTextShift.addView(endTime);
@@ -204,19 +217,22 @@ public class ShiftView {
         LinearLayout normalShift = new LinearLayout(parent.getContext());
         normalShift.setOrientation(LinearLayout.VERTICAL);
         normalShift.setGravity(Gravity.CENTER);
+        normalShift.setPadding(0,0,0,0);
         LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
         normalShift.setLayoutParams(LLParams);
         TextView startTime = new TextView(parent.getContext());
         startTime.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        startTime.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+        startTime.setTextSize(10);
+        startTime.setIncludeFontPadding(false);
+        startTime.setPadding(0, 2, 0, 2);
         startTime.setGravity(Gravity.CENTER);
         startTime.setText(this.startTime);
         normalShift.addView(startTime);
         TextView endTime = new TextView(parent.getContext());
         endTime.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, sizeOfView()));
-        endTime.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+        endTime.setTextSize(10); 
         endTime.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
         endTime.setText(this.endTime);
         endTime.setBackgroundResource(R.drawable.normal_shift_rectangle);
@@ -228,19 +244,20 @@ public class ShiftView {
         LinearLayout normalShift = new LinearLayout(parent.getContext());
         normalShift.setOrientation(LinearLayout.VERTICAL);
         normalShift.setBackgroundResource(R.drawable.normal_shift_rectangle);
+        normalShift.setPadding(0,0,0,0);
         LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, sizeOfView());
         normalShift.setLayoutParams(LLParams);
         TextView startTime = new TextView(parent.getContext());
         startTime.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        startTime.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+        startTime.setTextSize(10); 
         startTime.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
         startTime.setText(this.startTime);
         normalShift.addView(startTime);
         TextView endTime = new TextView(parent.getContext());
         endTime.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-        endTime.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 10);
+        endTime.setTextSize(10); 
         endTime.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
 
         endTime.setText(this.endTime);
