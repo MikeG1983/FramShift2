@@ -199,6 +199,34 @@ public class ShiftView {
         startTime.setTextSize(10); 
         startTime.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
         startTime.setBackgroundResource(R.drawable.normal_shift_rectangle);
+        startTime.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View ve) {
+                final View v = ve;
+                AlertDialog.Builder builder = new AlertDialog.Builder(v.getRootView().getContext());
+                builder.setTitle("Edit Confirmation");
+                builder.setMessage("Do you want to edit this shift ?");
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                        Intent intent = new Intent(v.getRootView().getContext(), EnterShift.class);
+                        intent.putExtra("startTime", baseShiftStart);
+                        intent.putExtra("endTime", baseShiftEnd);
+                        intent.putExtra("id", baseShiftId);
+                        intent.putExtra("edit", "yes");
+                        v.getRootView().getContext().startActivity(intent);
+                    }
+                });
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+                AlertDialog alert = builder.create();
+                alert.show();
+
+
+            }
+        });
         startTime.setText(this.startTime);
         noStartTextShift.addView(startTime);
         TextView endTime = new TextView(parent.getContext());
@@ -236,6 +264,35 @@ public class ShiftView {
         endTime.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
         endTime.setText(this.endTime);
         endTime.setBackgroundResource(R.drawable.normal_shift_rectangle);
+        endTime.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View ve) {
+                final View v = ve;
+                AlertDialog.Builder builder = new AlertDialog.Builder(v.getRootView().getContext());
+                builder.setTitle("Edit Confirmation");
+                builder.setMessage("Do you want to edit this shift ?");
+//                builder.setIcon(R.drawable.ic_launcher);
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                        Intent intent = new Intent(v.getRootView().getContext(), EnterShift.class);
+                        intent.putExtra("startTime", baseShiftStart);
+                        intent.putExtra("endTime", baseShiftEnd);
+                        intent.putExtra("id", baseShiftId);
+                        intent.putExtra("edit", "yes");
+                        v.getRootView().getContext().startActivity(intent);
+                    }
+                });
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+                AlertDialog alert = builder.create();
+                alert.show();
+
+
+            }
+        });
         normalShift.addView(endTime);
         return normalShift;
     }
@@ -244,6 +301,35 @@ public class ShiftView {
         LinearLayout normalShift = new LinearLayout(parent.getContext());
         normalShift.setOrientation(LinearLayout.VERTICAL);
         normalShift.setBackgroundResource(R.drawable.normal_shift_rectangle);
+        normalShift.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View ve) {
+                final View v = ve;
+                AlertDialog.Builder builder = new AlertDialog.Builder(v.getRootView().getContext());
+                builder.setTitle("Edit Confirmation");
+                builder.setMessage("Do you want to edit this shift ?");
+//                builder.setIcon(R.drawable.ic_launcher);
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                        Intent intent = new Intent(v.getRootView().getContext(), EnterShift.class);
+                        intent.putExtra("startTime", baseShiftStart);
+                        intent.putExtra("endTime", baseShiftEnd);
+                        intent.putExtra("id", baseShiftId);
+                        intent.putExtra("edit", "yes");
+                        v.getRootView().getContext().startActivity(intent);
+                    }
+                });
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+                AlertDialog alert = builder.create();
+                alert.show();
+
+
+            }
+        });
         normalShift.setPadding(0,0,0,0);
         LinearLayout.LayoutParams LLParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, sizeOfView());
         normalShift.setLayoutParams(LLParams);

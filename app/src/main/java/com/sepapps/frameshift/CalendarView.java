@@ -37,9 +37,10 @@ public class CalendarView extends Fragment {
     //constructor
     public CalendarView() {
         Locale locale = MainActivity.locale;
-        calendar = Calendar.getInstance(locale);
-
-
+                calendar = Calendar.getInstance(locale);
+        if (MainActivity.currentWeek != 0L){
+            calendar.setTimeInMillis(MainActivity.currentWeek);
+        }
     }
 
     // return the view object
@@ -49,6 +50,7 @@ public class CalendarView extends Fragment {
         final RelativeLayout calendarLayout = (RelativeLayout) inflater.inflate(R.layout.calendar, null);
         final GridView calendarDayGrid = (GridView) calendarLayout.findViewById(R.id.calendar_days_grid);
         final GestureDetector swipeDetector = new GestureDetector(getActivity(), new SwipeGesture(getActivity()));
+
         shiftGrid = (GridView) calendarLayout.findViewById(R.id.shift_grid);
         calendarSwitcher = (ViewSwitcher) calendarLayout.findViewById(R.id.calendar_switcher);
         currentWeek = (TextView) calendarLayout.findViewById(R.id.current_week);

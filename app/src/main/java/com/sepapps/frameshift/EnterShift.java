@@ -28,8 +28,8 @@ public class EnterShift extends Activity
     private String currentDate;
     private String edit;
     private String currentTime;
-    private Date currentlySetFromDate;
-    private Date currentlySetToDate;
+    private long currentlySetFromDate;
+    private long currentlySetToDate;
     private static final int START_PICKER_ID = 1;
     private static final int END_PICKER_ID = 2;
 
@@ -37,8 +37,8 @@ public class EnterShift extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         Intent intent = getIntent();
         Long defaultLong = 0L;
-        Long startLong = intent.getLongExtra("startTime", defaultLong);
-        Long endLong = intent.getLongExtra("endTime", defaultLong);
+        currentlySetFromDate = intent.getLongExtra("startTime", defaultLong);
+        currentlySetToDate = intent.getLongExtra("endTime", defaultLong);
         edit = intent.getStringExtra("edit");
         super.onCreate(savedInstanceState);
         Calendar c = Calendar.getInstance();
@@ -61,13 +61,13 @@ public class EnterShift extends Activity
         });
 
             //get the shift start time into the fields
-            c.setTimeInMillis(startLong);
+            c.setTimeInMillis(currentlySetFromDate);
             currentDayOfWeek = dayOfWeekFormat.format(c.getTime());
             currentDate = dateFormat.format(c.getTime());
             startDate.setText(currentDayOfWeek + ", " + currentDate);
             currentTime = timeFormat.format(c.getTime());
             startTime.setText(currentTime);
-            c.setTimeInMillis(endLong);
+            c.setTimeInMillis(currentlySetToDate);
             currentDayOfWeek = dayOfWeekFormat.format(c.getTime());
             currentDate = dateFormat.format(c.getTime());
             endDate.setText(currentDayOfWeek + ", " + currentDate);
@@ -186,6 +186,7 @@ public class EnterShift extends Activity
 
     public void loadCalendar(View view) {
         Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("currentWeek", currentlySetFromDate);
         startActivity(intent);
     }
 }

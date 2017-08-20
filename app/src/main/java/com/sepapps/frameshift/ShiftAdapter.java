@@ -23,6 +23,7 @@ public class ShiftAdapter extends BaseAdapter {
     private final Calendar calendar;
     private Shift[] shifts;
     private ArrayList[] shiftDays;
+    private long[] dayStarts;
 
     public ShiftAdapter(Context context, Calendar weekCalendar) {
         calendar = weekCalendar;
@@ -50,7 +51,7 @@ public class ShiftAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
-         //get the amount of screen height remaining for the shift cell
+        //get the amount of screen height remaining for the shift cell
         int usedSpace = (int) MainActivity.deviceDensity * (92 + MainActivity.actionBarHeight);
         int availableSpace = (MainActivity.deviceHeight - usedSpace);
         int textViewPadding = 4;
@@ -68,6 +69,7 @@ public class ShiftAdapter extends BaseAdapter {
         day_cell.setClickable(false);
         day_cell.setOrientation(LinearLayout.VERTICAL);
         ArrayList<Shift> thisDaysShifts = shiftDays[position];
+        long thisDaysStart = dayStarts[position];
 
 
         if (thisDaysShifts.size() > 0) { //if there are some shifts for this day/cell
@@ -180,9 +182,18 @@ public class ShiftAdapter extends BaseAdapter {
                 }
                 if (endDayWhitespace != null) { //if this is the last shift of the day
                     day_cell.addView(endDayWhitespace);
-                                    }
+                }
                 previousShiftEndFormatted = shiftEnd;
             }
+        } else { //if there are no shifts, create whitespace for the day
+            Calendar shiftTimeHelper = Calendar.getInstance(MainActivity.locale);
+            //get the millisecond time of midnight this morning (this calendar day of cell)
+            shiftTimeHelper.setTimeInMillis(thisDaysStart);
+            shiftTimeHelper.set(Calendar.HOUR_OF_DAY, 12);
+            shiftTimeHelper.set(Calendar.MINUTE, 0);
+            long whitespaceShiftTime = shiftTimeHelper.getTimeInMillis();
+            ShiftView whitespaceShift = new ShiftView("00:00", "23:59", whitespaceShiftTime, whitespaceShiftTime, 0);
+            day_cell.addView(whitespaceShift.getWhitespaceShiftView(parent, (0)));
         }
         view = day_cell;
         return view;
@@ -196,7 +207,7 @@ public class ShiftAdapter extends BaseAdapter {
         calCopy.set(Calendar.HOUR_OF_DAY, 0);
         calCopy.set(Calendar.MINUTE, 0);
         //create an array to hold the start of every day plus one extra
-        long[] dayStarts = new long[8];
+        dayStarts = new long[8];
         dayStarts[0] = calCopy.getTimeInMillis();
         for (int i = 1; i < dayStarts.length; i++) {
             calCopy.add(Calendar.DATE, 1);

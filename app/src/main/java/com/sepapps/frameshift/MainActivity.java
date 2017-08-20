@@ -3,6 +3,7 @@ package com.sepapps.frameshift;
 import android.app.Activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -14,9 +15,13 @@ public class MainActivity extends Activity {
     public static float deviceDensity;
     public static Locale locale;
     public static DisplayMetrics metrics;
+    public static long currentWeek;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Intent intent = getIntent();
+        Long defaultLong = 0L;
+        currentWeek = intent.getLongExtra("currentWeek", defaultLong);
         locale = Locale.UK;
         metrics = new DisplayMetrics();
         //get the screen dimensions
