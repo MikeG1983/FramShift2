@@ -113,7 +113,7 @@ public class ShiftView {
             theViewHeight = 0;
         }
         rectangle.setLayoutParams(new android.widget.LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, theViewHeight));
-        rectangle.setBackgroundResource(R.drawable.normal_background_test);
+        rectangle.setBackgroundResource(R.drawable.normal_background);
         rectangle.setOnClickListener(new View.OnClickListener() {
             public void onClick(View ve) {
                 final View v = ve;
@@ -149,9 +149,9 @@ public class ShiftView {
 
     private Integer sizeOfView() {
         //calculate the amount of space used
-        int usedSpace = (int) MainActivity.deviceDensity * (92 + MainActivity.actionBarHeight);
-        int availableSpace = (MainActivity.deviceHeight - (usedSpace + 20));
-
+        int usedSpace = (int) (MainActivity.deviceDensity * 92);
+//        int availableSpace = (MainActivity.deviceHeight - (usedSpace + 20));
+        int availableSpace = (MainActivity.deviceHeight - (usedSpace + MainActivity.actionBarHeight + 72 + 20));
         int totalMinutesInDay = 1439;
         String[] startArray = this.startTime.split(":");
         int startHour = Integer.valueOf(startArray[0]);
@@ -174,10 +174,14 @@ public class ShiftView {
      * inside the rectangle
      */
     public static int getMinutesBreakpoint() {
-        int usedSpace = (int) MainActivity.deviceDensity * (92 + MainActivity.actionBarHeight);
-        int availableSpace = (MainActivity.deviceHeight - (usedSpace + 20));
+        int usedSpace = (int) (MainActivity.deviceDensity * 92);
+//        int availableSpace = (MainActivity.deviceHeight - (usedSpace + 20));
+        int availableSpace = (MainActivity.deviceHeight - (usedSpace + MainActivity.actionBarHeight + 70 + 20));
         int totalMinutesInDay = 1440;
-        int pixelPerTextview = (int) (10 * MainActivity.deviceDensity);
+//        int pixelPerTextview = (int) (10 * MainActivity.deviceDensity);
+        int textViewPadding = 4;
+        int textViewTextHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 14, MainActivity.metrics);
+        int pixelPerTextview = textViewPadding + textViewTextHeight;
         double onePercentOfAvailableSpace = availableSpace / 100.0;
         //work out the percentage of the grid cell that a textview takes up
         double textViewPercentage = (pixelPerTextview / (onePercentOfAvailableSpace));

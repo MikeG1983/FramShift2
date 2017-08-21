@@ -5,8 +5,12 @@ package com.sepapps.frameshift;
  */
 
 import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.TimeZone;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
@@ -33,14 +37,30 @@ public class CalendarView extends Fragment {
     private static long idCounter = 0;
     private GridView shiftGrid;
     private ShiftAdapter shiftAdapter;
+    private ViewConfiguration viewConfig;
+    public static int gmtOffset;
 
     //constructor
     public CalendarView() {
         Locale locale = MainActivity.locale;
-                calendar = Calendar.getInstance(locale);
-        if (MainActivity.currentWeek != 0L){
+        TimeZone defaultTime = TimeZone.getDefault();
+        calendar = new GregorianCalendar(defaultTime, locale);
+        if (MainActivity.currentWeek != 0L) {
             calendar.setTimeInMillis(MainActivity.currentWeek);
         }
+        gmtOffset = defaultTime.getOffset(
+                calendar.get(Calendar.ERA),
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH),
+                calendar.get(Calendar.DAY_OF_WEEK),
+                calendar.get(Calendar.MILLISECOND));
+        gmtOffset = gmtOffset / (60*60*1000);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.add(Calendar.HOUR, gmtOffset);
     }
 
     // return the view object
@@ -49,34 +69,73 @@ public class CalendarView extends Fragment {
         // set the layout views to variables +  get a gesture detector
         final RelativeLayout calendarLayout = (RelativeLayout) inflater.inflate(R.layout.calendar, null);
         final GridView calendarDayGrid = (GridView) calendarLayout.findViewById(R.id.calendar_days_grid);
-        final GestureDetector swipeDetector = new GestureDetector(getActivity(), new SwipeGesture(getActivity()));
+        viewConfig = ViewConfiguration.get(getActivity());
+        final GestureDetector gesture = new GestureDetector(getActivity(),
+                new GestureDetector.SimpleOnGestureListener() {
+                    private MotionEvent mLastOnDownEvent = null;
+
+                    @Override
+                    public boolean onDown(MotionEvent e) {
+                        //Android 4.0 bug means e1 in onFling may be NULL due to onLongPress eating it.
+                        mLastOnDownEvent = e;
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                        final int swipeMinDistance = viewConfig.getScaledTouchSlop();
+                        final int swipeThresholdVelocity = viewConfig.getScaledMinimumFlingVelocity();
+                        try {
+                            if (e1 == null)
+                                e1 = mLastOnDownEvent;
+                            if (e1.getX() - e2.getX() > swipeMinDistance && Math.abs(velocityX) > swipeThresholdVelocity) {
+                                onNextWeek();
+                            } else if (e2.getX() - e1.getX() > swipeMinDistance && Math.abs(velocityX) > swipeThresholdVelocity) {
+                                onPreviousWeek();
+                            }
+                            return false;
+                        } catch (Exception e) {
+                            //nothing
+                        }
+                        return super.onFling(e1, e2, velocityX, velocityY);
+                    }
+                });
 
         shiftGrid = (GridView) calendarLayout.findViewById(R.id.shift_grid);
+        shiftGrid.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return gesture.onTouchEvent(event);
+            }
+        });
+
         calendarSwitcher = (ViewSwitcher) calendarLayout.findViewById(R.id.calendar_switcher);
         currentWeek = (TextView) calendarLayout.findViewById(R.id.current_week);
         // create a new calendar adapter, and pass it the context and the calendar
-        calendarAdapter = new CalendarAdapter(getActivity(), calendar);
-        shiftAdapter = new ShiftAdapter(getActivity(), calendar);
+        calendarAdapter = new
+                CalendarAdapter(getActivity(), calendar);
+        shiftAdapter = new
+                ShiftAdapter(getActivity(), calendar);
+
         // This sets the month in the title
         updateCurrentWeek();
+
         // set the buttons to variables and set the event listeners for the buttons and the day
         //grid
         final TextView nextWeek = (TextView) calendarLayout.findViewById(R.id.next_week);
-        nextWeek.setOnClickListener(new NextWeekClickListener());
+        nextWeek.setOnClickListener(new
+
+                NextWeekClickListener());
         final TextView prevWeek = (TextView) calendarLayout.findViewById(R.id.previous_week);
-        prevWeek.setOnClickListener(new PreviousWeekClickListener());
-//        shift.setOnItemClickListener(new ShiftItemClickListener());
+        prevWeek.setOnClickListener(new
+
+                PreviousWeekClickListener());
+
         //Set the adapter for the calendar days grid
         calendarDayGrid.setAdapter(calendarAdapter);
-        //TODO set the adapter for the shift grid
+
         shiftGrid.setAdapter(shiftAdapter);
-        //set a swipe listener for the body
-        shiftGrid.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return swipeDetector.onTouchEvent(event);
-            }
-        });
+
         return calendarLayout;
     }
 
@@ -86,35 +145,24 @@ public class CalendarView extends Fragment {
         //call the shift adapter method refreshShifts
         shiftAdapter.refreshShifts();
         // sets the current week in the title
-        // set the first day of the week for the locale (monday)
 
         // set the day to monday (this eventually will be read from user settings.
         Calendar calCopy = (Calendar) (calendar.clone());
+        long theTime = calCopy.getTimeInMillis();
         calCopy.set(Calendar.DAY_OF_WEEK, calCopy.getFirstDayOfWeek());
+        theTime = calCopy.getTimeInMillis();
         String title = "" + calCopy.get(Calendar.DAY_OF_MONTH) + " "
                 + calCopy.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.UK);
         calCopy.add(Calendar.DATE, 6);
         title += " - " + calCopy.get(Calendar.DAY_OF_MONTH) + " "
                 + calCopy.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.UK) + " ";
         title += calCopy.get(Calendar.YEAR);
-        currentWeek.setText("");
+        currentWeek.setText(title);
         ActionBar actionBar = getActivity().getActionBar();
         actionBar.setTitle(title);
 
     }
 
-//    private final class ShiftItemClickListener implements OnItemClickListener {
-//        //when a day item is clicked
-//        @Override
-//        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//            final TextView dayView = (TextView)view.findViewById(R.id.date);
-//            final CharSequence text = dayView.getText();
-//            if (text != null && !"".equals(text)) {
-//                //highlight the day
-//                calendarAdapter.setSelected(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), Integer.valueOf(String.valueOf(text)));
-//            }
-//        }
-//    }
 
     protected final void onNextWeek() {
         //when the next button is clicked, set the animations and show the next week's days
@@ -165,27 +213,6 @@ public class CalendarView extends Fragment {
         }
     }
 
-    private final class SwipeGesture extends SimpleOnGestureListener {
-        private final int swipeMinDistance;
-        private final int swipeThresholdVelocity;
-
-        public SwipeGesture(Context context) {
-            final ViewConfiguration viewConfig = ViewConfiguration.get(context);
-            swipeMinDistance = viewConfig.getScaledTouchSlop();
-            swipeThresholdVelocity = viewConfig.getScaledMinimumFlingVelocity();
-        }
-
-        // if the swipe velocity is more than the threshhold then call the relevant method
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            if (e1.getX() - e2.getX() > swipeMinDistance && Math.abs(velocityX) > swipeThresholdVelocity) {
-                onNextWeek();
-            } else if (e2.getX() - e1.getX() > swipeMinDistance && Math.abs(velocityX) > swipeThresholdVelocity) {
-                onPreviousWeek();
-            }
-            return false;
-        }
-    }
 
     public static synchronized Long createID() {
         return idCounter++;

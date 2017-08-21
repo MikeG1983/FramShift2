@@ -2,6 +2,7 @@ package com.sepapps.frameshift;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -35,10 +36,13 @@ public class FrameShiftDatabaseHelper extends SQLiteOpenHelper {
      * parameters
      * @param db the database
      */
-    private static void insertShift(SQLiteDatabase db, Calendar startTime, Calendar endTime, String comment) {
-        ContentValues shiftValues = new ContentValues();
-        shiftValues.put("START_TIME", startTime.getTimeInMillis());
-        shiftValues.put("END_TIME", endTime.getTimeInMillis());
+    private static void insertShift(SQLiteDatabase db, long startTime, long endTime, String comment) {
+        Cursor cursor = db.query("SHIFT",
+                new String[] {"_id"},
+                "START_TIME>? and START_TIME", null, null, null, null);
+                ContentValues shiftValues = new ContentValues();
+        shiftValues.put("START_TIME", startTime);
+        shiftValues.put("END_TIME", endTime);
         shiftValues.put("COMMENT", comment);
         db.insert("SHIFT", null, shiftValues);
 

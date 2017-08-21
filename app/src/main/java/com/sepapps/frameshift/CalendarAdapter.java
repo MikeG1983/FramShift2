@@ -29,15 +29,23 @@ public class CalendarAdapter extends BaseAdapter {
 
     public CalendarAdapter(Context context, Calendar weekCalendar) {
         calendar = weekCalendar;
-        locale = Locale.getDefault();
+        long theTime = calendar.getTimeInMillis();
+//        locale = Locale.getDefault();
+        locale = Locale.UK;
         dayFormat = new SimpleDateFormat("E", Locale.UK);
         // get the variables to construct the today object
-        int date = weekCalendar.get(Calendar.DAY_OF_MONTH);
-        String theDayName = dayFormat.format(weekCalendar.getTime());
+        Calendar todayCalendar = Calendar.getInstance();
+        int date = todayCalendar.get(Calendar.DAY_OF_MONTH);
+        String theDayName = dayFormat.format(todayCalendar.getTime());
+        todayCalendar.set(Calendar.HOUR_OF_DAY, 0);
+        todayCalendar.set(Calendar.MINUTE, 0);
+        todayCalendar.set(Calendar.SECOND, 0);
+        todayCalendar.set(Calendar.MILLISECOND, 0);
+        todayCalendar.add(Calendar.HOUR, CalendarView.gmtOffset);
         //create the today object
-        today = new CalendarDay(date, theDayName);
+        today = new CalendarDay(date, theDayName, todayCalendar.getTimeInMillis());
         //set the calendar to the first day of the week
-        calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+         theTime = calendar.getTimeInMillis();
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -87,21 +95,27 @@ public class CalendarAdapter extends BaseAdapter {
 
     public final void refreshDays() {
 
-        final int year = calendar.get(Calendar.YEAR);
-        final int week = calendar.get(Calendar.WEEK_OF_YEAR);
         final CalendarDay[] days;
-        Calendar calCopy = (Calendar)(calendar.clone());
+        Calendar calCopy = (Calendar) (calendar.clone());
+        long theTime = calCopy.getTimeInMillis();
+
         // Set the day to the first day of the week
         calCopy.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
-
+        theTime = calCopy.getTimeInMillis();
+        calCopy.getTime();
         days = new CalendarDay[7];
         for (int i = 0; i < 7; i++) {
             int theDate = calCopy.get(Calendar.DAY_OF_MONTH);
             String theDayName = dayFormat.format(calCopy.getTime());
-            days[i] = new CalendarDay(theDate, theDayName);
+            calCopy.set(Calendar.HOUR_OF_DAY, 0);
+            calCopy.set(Calendar.MINUTE, 0);
+            calCopy.set(Calendar.SECOND, 0);
+            calCopy.set(Calendar.MILLISECOND, 0);
+            calCopy.add(Calendar.HOUR, CalendarView.gmtOffset);
+            days[i] = new CalendarDay(theDate, theDayName, calCopy.getTimeInMillis());
             calCopy.add(Calendar.DATE, 1);
         }
-            this.calendarDays = days;
+        this.calendarDays = days;
 
         notifyDataSetChanged();
     }
@@ -111,26 +125,26 @@ public class CalendarAdapter extends BaseAdapter {
         public String day;
         public String text;
         public Long id;
+        public long theDayLong;
 
 
-        public CalendarDay(int date, String day) {
+        public CalendarDay(int date, String day, long daylong) {
             this.date = date;
             this.day = day;
-            this.text = day + System.getProperty ("line.separator") + date;
+            this.text = day + System.getProperty("line.separator") + date;
             this.id = CalendarView.createID();
-
+            this.theDayLong = daylong;
         }
 
         @Override
         public boolean equals(Object o) {
             if (o != null && o instanceof CalendarDay) {
                 final CalendarDay item = (CalendarDay) o;
-               Boolean rtn = item.date == date && item.day.equals(day);
+                Boolean rtn = item.theDayLong == theDayLong;
                 return rtn;
             }
             return false;
         }
-
 
 
     }

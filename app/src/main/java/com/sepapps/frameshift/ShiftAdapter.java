@@ -52,10 +52,10 @@ public class ShiftAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View view, ViewGroup parent) {
         //get the amount of screen height remaining for the shift cell
-        int usedSpace = (int) MainActivity.deviceDensity * (92 + MainActivity.actionBarHeight);
-        int availableSpace = (MainActivity.deviceHeight - usedSpace);
+        int usedSpace = (int) (MainActivity.deviceDensity * 92);
+        int availableSpace = (MainActivity.deviceHeight - (usedSpace + MainActivity.actionBarHeight + 72));
         int textViewPadding = 4;
-        int textViewTextHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 10, MainActivity.metrics);
+        int textViewTextHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15, MainActivity.metrics);
         int pixelPerTextview = textViewPadding + textViewTextHeight;
         //get the relative number of minutes (based on cell height being 24 hours) needed to display
         // a text view
@@ -63,7 +63,7 @@ public class ShiftAdapter extends BaseAdapter {
         LinearLayout day_cell = new LinearLayout(parent.getContext());
         day_cell.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         //set the height of the cell to the remaining space
-        day_cell.setMinimumHeight((int) availableSpace);
+        day_cell.setMinimumHeight(availableSpace);
         day_cell.setPadding(10, 10, 10, 10);
         day_cell.setBackgroundResource(R.drawable.normal_background);
         day_cell.setClickable(false);
@@ -78,6 +78,7 @@ public class ShiftAdapter extends BaseAdapter {
             shiftTimeHelper.setTimeInMillis(thisDaysShifts.get(0).getStartTime());
             shiftTimeHelper.set(Calendar.HOUR_OF_DAY, 0);
             shiftTimeHelper.set(Calendar.MINUTE, 0);
+//            shiftTimeHelper.set(Calendar.HOUR, CalendarView.gmtOffset);
             long midnightThisMorning = shiftTimeHelper.getTimeInMillis();
             long shiftEndMillis = 0; //declare outside loop so I can access the previous shift end time.
             String previousShiftEndFormatted = null; //declare outside loop so I can access the previous shift end time.
@@ -206,6 +207,7 @@ public class ShiftAdapter extends BaseAdapter {
         calCopy.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
         calCopy.set(Calendar.HOUR_OF_DAY, 0);
         calCopy.set(Calendar.MINUTE, 0);
+//        calCopy.set(Calendar.HOUR, CalendarView.gmtOffset);
         //create an array to hold the start of every day plus one extra
         dayStarts = new long[8];
         dayStarts[0] = calCopy.getTimeInMillis();
@@ -215,6 +217,9 @@ public class ShiftAdapter extends BaseAdapter {
         }
         //reset the calendar copy
         calCopy = (Calendar) (calendar.clone());
+        calCopy.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+        calCopy.set(Calendar.HOUR_OF_DAY, 0);
+        calCopy.set(Calendar.MINUTE, 0);
         //pretend to get the shifts from the database
         //there were 4 shifts retrieved, so set the size to 4
         Shift[] theShifts = new Shift[4];
