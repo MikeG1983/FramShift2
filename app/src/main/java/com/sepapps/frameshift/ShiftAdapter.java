@@ -299,7 +299,7 @@ public class ShiftAdapter extends BaseAdapter {
                     displayShiftEnd = theShifts.get(i).getEndTime();
                 }
                 //if the shift end time is after the end of the day, but started before it
-                if ((theShifts.get(i).getEndTime() > dayStarts[j + 1]) && (theShifts.get(i).getStartTime() <= dayStarts[j])) {
+                if ((theShifts.get(i).getEndTime() > dayStarts[j + 1]) && (theShifts.get(i).getStartTime() <= dayStarts[j + 1])) {
                     displayShiftEnd = (dayStarts[j + 1] - 60000);
                 }
                 // if the shift is for this day, then add it to the array

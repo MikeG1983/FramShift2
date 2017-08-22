@@ -50,7 +50,11 @@ public class EnterShift extends Activity
         edit = intent.getStringExtra("edit");
         super.onCreate(savedInstanceState);
         Calendar c = Calendar.getInstance();
-        setContentView(R.layout.activity_enter_shift);
+        if (edit.equals("yes")) {
+            setContentView(R.layout.activity_edit_shift);
+        } else {
+            setContentView(R.layout.activity_enter_shift);
+        }
         //set the format for the text fields
         dayOfWeekFormat = new SimpleDateFormat("EEE", Locale.UK);
         dateFormat = new SimpleDateFormat("d MMMM yyyy", Locale.UK);
@@ -65,6 +69,12 @@ public class EnterShift extends Activity
             addEditButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     editShift(v);
+                }
+            });
+            Button deleteButton = (Button) findViewById(R.id.deleteButton);
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    deleteShift(v);
                 }
             });
         } else {
@@ -329,6 +339,18 @@ public class EnterShift extends Activity
             cursor.close();
             return false;
         }
+    }
+
+    private void deleteShift(View v) {
+        TextView startDate = (TextView) findViewById(R.id.startDate);
+        TextView startTime = (TextView) findViewById(R.id.startTime);
+        long shiftStartLong = TimeConverter.getLongFromDateAndTime("" + startDate.getText(), "" + startTime.getText());
+        FrameShiftDatabaseHelper dbHelper = new FrameShiftDatabaseHelper(this);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        db.delete("SHIFT", "_id = ?", new String[]{String.valueOf(shiftID)});
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("currentWeek", shiftStartLong);
+        startActivity(intent);
     }
 
 }
