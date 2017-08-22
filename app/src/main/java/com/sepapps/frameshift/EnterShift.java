@@ -35,6 +35,7 @@ public class EnterShift extends Activity
     private String currentTime;
     private long currentlySetFromDate;
     private long currentlySetToDate;
+    private long shiftID;
     private static final int START_PICKER_ID = 1;
     private static final int END_PICKER_ID = 2;
 
@@ -44,6 +45,8 @@ public class EnterShift extends Activity
         Long defaultLong = 0L;
         currentlySetFromDate = intent.getLongExtra("startTime", defaultLong);
         currentlySetToDate = intent.getLongExtra("endTime", defaultLong);
+        shiftID = intent.getLongExtra("id", defaultLong);
+
         edit = intent.getStringExtra("edit");
         super.onCreate(savedInstanceState);
         Calendar c = Calendar.getInstance();
@@ -61,7 +64,7 @@ public class EnterShift extends Activity
             addEditButton.setText("Edit");
             addEditButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    // Do something in response to button click
+                    editShift(v);
                 }
             });
         } else {
@@ -213,14 +216,9 @@ public class EnterShift extends Activity
         long shiftEndLong = TimeConverter.getLongFromDateAndTime("" + endDate.getText(), "" + toTime.getText());
         FrameShiftDatabaseHelper dbHelper = new FrameShiftDatabaseHelper(this);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-
-        if (this.insertShift(db, shiftStartLong, shiftEndLong, "")) {
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.putExtra("currentWeek", shiftStartLong);
-            startActivity(intent);
-        } else {
+        if (shiftStartLong > shiftEndLong) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Error: Can't save shift, it overlaps with an existing shift.")
+            builder.setMessage("Error: Shift cannot finish before it starts!")
                     .setCancelable(false)
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
@@ -229,10 +227,83 @@ public class EnterShift extends Activity
                     });
             AlertDialog alert = builder.create();
             alert.show();
+        } else {
+            if (this.insertShift(db, shiftStartLong, shiftEndLong, "")) {
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.putExtra("currentWeek", shiftStartLong);
+                startActivity(intent);
+            } else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("Error: Can't save shift, it overlaps with an existing shift.")
+                        .setCancelable(false)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                //do things
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+
+            }
+        }
+    }
+
+    private void editShift(View v) {
+        TextView startDate = (TextView) findViewById(R.id.startDate);
+        TextView endDate = (TextView) findViewById(R.id.endDate);
+        TextView startTime = (TextView) findViewById(R.id.startTime);
+        TextView toTime = (TextView) findViewById(R.id.endTime);
+        long shiftStartLong = TimeConverter.getLongFromDateAndTime("" + startDate.getText(), "" + startTime.getText());
+        long shiftEndLong = TimeConverter.getLongFromDateAndTime("" + endDate.getText(), "" + toTime.getText());
+        if (shiftStartLong > shiftEndLong) { //if the shift finishes before it starts
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Error: Shift cannot finish before it starts!")
+                    .setCancelable(false)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            //do things
+                        }
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
+        } else { // if it finishes after it starts, check for conflicts
+            FrameShiftDatabaseHelper dbHelper = new FrameShiftDatabaseHelper(this);
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            Cursor cursor = db.query("SHIFT",
+                    new String[]{"_id"},
+                    "START_TIME < ? and END_TIME > ?", new String[]{String.valueOf(shiftEndLong), String.valueOf(shiftStartLong)}, null, null, null);
+            if (cursor.getCount() <= 0) { //if there is no conflicting shift
+                cursor.close();
+                ContentValues shiftValues = new ContentValues();
+                shiftValues.put("START_TIME", shiftStartLong);
+                shiftValues.put("END_TIME", shiftEndLong);
+                shiftValues.put("COMMENT", "");
+                // do the update
+                db.update("SHIFT",
+                        shiftValues,
+                        "id = ?",
+                        new String[]{String.valueOf(shiftID)}
+                );
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.putExtra("currentWeek", shiftStartLong);
+                startActivity(intent);
+            } else {
+                cursor.close();
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("Error: Can't save shift, it overlaps with an existing shift.")
+                        .setCancelable(false)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                //do things
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+            }
 
         }
-
     }
+
 
     /**
      * Inserts a shift into the database with the start time, end time and comment passed in the
@@ -254,9 +325,10 @@ public class EnterShift extends Activity
             shiftValues.put("COMMENT", comment);
             db.insert("SHIFT", null, shiftValues);
             return true;
-        } //if there is a conflict
-        cursor.close();
-        return false;
+        } else { //if there is a conflict
+            cursor.close();
+            return false;
+        }
     }
 
 }

@@ -206,7 +206,7 @@ public class ShiftAdapter extends BaseAdapter {
     }
 
     public final void refreshShifts() {
-        Calendar calCopy = (Calendar) (calendar.clone());
+         Calendar calCopy = (Calendar) (calendar.clone());
         // Set the day to the first day of the week
         //set the millisecond times for the start of week, and end of each day
         calCopy.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
@@ -291,7 +291,7 @@ public class ShiftAdapter extends BaseAdapter {
                     displayShiftStart = dayStarts[j];
                 }
                 //if the start time is between the start and the end of the day
-                if ((theShifts.get(i).getStartTime() > dayStarts[j]) && (theShifts.get(i).getStartTime() < dayStarts[j + 1])) {
+                if ((theShifts.get(i).getStartTime() >= dayStarts[j]) && (theShifts.get(i).getStartTime() < dayStarts[j + 1])) {
                     displayShiftStart = theShifts.get(i).getStartTime();
                 }
                 //if the shift end time is between the start and end of the day
@@ -299,7 +299,7 @@ public class ShiftAdapter extends BaseAdapter {
                     displayShiftEnd = theShifts.get(i).getEndTime();
                 }
                 //if the shift end time is after the end of the day, but started before it
-                if ((theShifts.get(i).getEndTime() > dayStarts[j + 1]) && (theShifts.get(i).getStartTime() < dayStarts[j])) {
+                if ((theShifts.get(i).getEndTime() > dayStarts[j + 1]) && (theShifts.get(i).getStartTime() <= dayStarts[j])) {
                     displayShiftEnd = (dayStarts[j + 1] - 60000);
                 }
                 // if the shift is for this day, then add it to the array
@@ -307,35 +307,35 @@ public class ShiftAdapter extends BaseAdapter {
                     shiftDays[j].add(new Shift(displayShiftStart, displayShiftEnd, theShifts.get(i).getId()));
                 }
             }
-
-            notifyDataSetChanged();
-        }
-
+                    }
+        notifyDataSetChanged();
 
     }
 
     private ArrayList<Shift> getShiftsBetween(long weekStart, long weekEnd) {
         ArrayList<Shift> thisWeeksShifts = new ArrayList<>();
-        try {
-            FrameShiftDatabaseHelper dbHelper = new FrameShiftDatabaseHelper(thisContext);
-            SQLiteDatabase db = dbHelper.getWritableDatabase();
-            Cursor cursor = db.query("SHIFT",
-                    new String[]{"_id", "START_TIME", "END_TIME"},
-                    "START_TIME >= ? and END_TIME < ?", new String[]{String.valueOf(weekStart), String.valueOf(weekEnd)}, null, null, null);
-            int id = cursor.getColumnIndex("_id");
-            int startTime = cursor.getColumnIndex("START_TIME");
-            int endTime = cursor.getColumnIndex("END_TIME");
-            while (cursor.moveToNext()) {
-                long longId = cursor.getLong(id);
-                long longStart = cursor.getLong(startTime);
-                long longEnd = cursor.getLong(endTime);
-                thisWeeksShifts.add(new Shift(longStart, longEnd, longId));
-            }
-            return thisWeeksShifts;
 
-        } catch (Exception e) {
-            Log.d("e", e.toString());
-            return thisWeeksShifts;
+        FrameShiftDatabaseHelper dbHelper = new FrameShiftDatabaseHelper(thisContext);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        Cursor cursor = db.query("SHIFT",
+                new String[]{"_id", "START_TIME", "END_TIME"},
+                "START_TIME >= ? and END_TIME < ?",
+                new String[]{String.valueOf(weekStart), String.valueOf(weekEnd)},
+                null,
+                null,
+                "START_TIME" + " ASC");
+        int id = cursor.getColumnIndex("_id");
+        int startTime = cursor.getColumnIndex("START_TIME");
+        int endTime = cursor.getColumnIndex("END_TIME");
+        while (cursor.moveToNext()) {
+            long longId = cursor.getLong(id);
+            long longStart = cursor.getLong(startTime);
+            long longEnd = cursor.getLong(endTime);
+            thisWeeksShifts.add(new Shift(longStart, longEnd, longId));
         }
+        cursor.close();
+        return thisWeeksShifts;
+
     }
 }
+
