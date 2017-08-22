@@ -158,8 +158,8 @@ public class CalendarView extends Fragment {
                 + calCopy.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.UK) + " ";
         title += calCopy.get(Calendar.YEAR);
         currentWeek.setText(title);
-        ActionBar actionBar = getActivity().getActionBar();
-        actionBar.setTitle(title);
+//        ActionBar actionBar = getActivity().getActionBar();
+//        actionBar.setTitle(title);
 
     }
 

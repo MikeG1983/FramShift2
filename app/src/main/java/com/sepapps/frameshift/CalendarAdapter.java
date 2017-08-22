@@ -97,11 +97,8 @@ public class CalendarAdapter extends BaseAdapter {
 
         final CalendarDay[] days;
         Calendar calCopy = (Calendar) (calendar.clone());
-        long theTime = calCopy.getTimeInMillis();
-
-        // Set the day to the first day of the week
+                // Set the day to the first day of the week
         calCopy.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
-        theTime = calCopy.getTimeInMillis();
         calCopy.getTime();
         days = new CalendarDay[7];
         for (int i = 0; i < 7; i++) {

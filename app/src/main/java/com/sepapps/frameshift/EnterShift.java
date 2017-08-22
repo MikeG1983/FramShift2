@@ -1,8 +1,13 @@
 package com.sepapps.frameshift;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DialogFragment;
+import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -51,31 +56,36 @@ public class EnterShift extends Activity
         TextView endDate = (TextView) findViewById(R.id.endDate);
         TextView startTime = (TextView) findViewById(R.id.startTime);
         TextView toTime = (TextView) findViewById(R.id.endTime);
-        Button addEditButton = (Button) findViewById(R.id.saveButton);
-        addEditButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View ve) {
-                final View v = ve;
-                if (edit.equals("yes")) {
+        final Button addEditButton = (Button) findViewById(R.id.saveButton);
+        if (edit.equals("yes")) {
+            addEditButton.setText("Edit");
+            addEditButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    // Do something in response to button click
                 }
-            }
-        });
-
-            //get the shift start time into the fields
-            c.setTimeInMillis(currentlySetFromDate);
-            currentDayOfWeek = dayOfWeekFormat.format(c.getTime());
-            currentDate = dateFormat.format(c.getTime());
-            startDate.setText(currentDayOfWeek + ", " + currentDate);
-            currentTime = timeFormat.format(c.getTime());
-            startTime.setText(currentTime);
-            c.setTimeInMillis(currentlySetToDate);
-            currentDayOfWeek = dayOfWeekFormat.format(c.getTime());
-            currentDate = dateFormat.format(c.getTime());
-            endDate.setText(currentDayOfWeek + ", " + currentDate);
-            currentTime = timeFormat.format(c.getTime());
-            toTime.setText(currentTime);
+            });
+        } else {
+            addEditButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    saveShift(v);
+                }
+            });
+        }
+        //get the shift start time into the fields
+        c.setTimeInMillis(currentlySetFromDate);
+        currentDayOfWeek = dayOfWeekFormat.format(c.getTime());
+        currentDate = dateFormat.format(c.getTime());
+        startDate.setText(currentDayOfWeek + ", " + currentDate);
+        currentTime = timeFormat.format(c.getTime());
+        startTime.setText(currentTime);
+        c.setTimeInMillis(currentlySetToDate);
+        currentDayOfWeek = dayOfWeekFormat.format(c.getTime());
+        currentDate = dateFormat.format(c.getTime());
+        endDate.setText(currentDayOfWeek + ", " + currentDate);
+        currentTime = timeFormat.format(c.getTime());
+        toTime.setText(currentTime);
 
     }
-
 
 
     public void setStartTime(View v) {
@@ -105,14 +115,17 @@ public class EnterShift extends Activity
     @Override
     public void onTimeSet(int id, TimePicker view, int hourOfDay, int minute) {
         Log.i("TimePicker", "Time picker set from id " + id + "!");
+//        String stringHourOfDay = Integer.toString(hourOfDay);
+//        String stringMinute =  Integer.toString(minute);
+
         // if the timepicker was from the fromtime text view
         if (id == START_PICKER_ID) {
             TextView startTime = (TextView) findViewById(R.id.startTime);
-            startTime.setText(Integer.toString(hourOfDay) + ":" + Integer.toString(minute));
+            startTime.setText(String.format("%02d", hourOfDay) + ":" + String.format("%02d", minute));
         }
         if (id == END_PICKER_ID) {
             TextView endTime = (TextView) findViewById(R.id.endTime);
-            endTime.setText(Integer.toString(hourOfDay) + ":" + Integer.toString(minute));
+            endTime.setText(String.format("%02d", hourOfDay) + ":" + String.format("%02d", minute));
         }
 
 
@@ -189,4 +202,61 @@ public class EnterShift extends Activity
         intent.putExtra("currentWeek", currentlySetFromDate);
         startActivity(intent);
     }
+
+
+    public void saveShift(View view) {
+        TextView startDate = (TextView) findViewById(R.id.startDate);
+        TextView endDate = (TextView) findViewById(R.id.endDate);
+        TextView startTime = (TextView) findViewById(R.id.startTime);
+        TextView toTime = (TextView) findViewById(R.id.endTime);
+        long shiftStartLong = TimeConverter.getLongFromDateAndTime("" + startDate.getText(), "" + startTime.getText());
+        long shiftEndLong = TimeConverter.getLongFromDateAndTime("" + endDate.getText(), "" + toTime.getText());
+        FrameShiftDatabaseHelper dbHelper = new FrameShiftDatabaseHelper(this);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        if (this.insertShift(db, shiftStartLong, shiftEndLong, "")) {
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.putExtra("currentWeek", shiftStartLong);
+            startActivity(intent);
+        } else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Error: Can't save shift, it overlaps with an existing shift.")
+                    .setCancelable(false)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            //do things
+                        }
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
+
+        }
+
+    }
+
+    /**
+     * Inserts a shift into the database with the start time, end time and comment passed in the
+     * parameters
+     *
+     * @param db the database
+     */
+    private static boolean insertShift(SQLiteDatabase db, long startTime, long endTime, String comment) {
+        Cursor cursor = db.query("SHIFT",
+                new String[]{"_id"},
+                "START_TIME < ? and END_TIME > ?", new String[]{String.valueOf(endTime), String.valueOf(startTime)}, null, null, null);
+
+        //if there is no conflicting shift
+        if (cursor.getCount() <= 0) {
+            cursor.close();
+            ContentValues shiftValues = new ContentValues();
+            shiftValues.put("START_TIME", startTime);
+            shiftValues.put("END_TIME", endTime);
+            shiftValues.put("COMMENT", comment);
+            db.insert("SHIFT", null, shiftValues);
+            return true;
+        } //if there is a conflict
+        cursor.close();
+        return false;
+    }
+
 }

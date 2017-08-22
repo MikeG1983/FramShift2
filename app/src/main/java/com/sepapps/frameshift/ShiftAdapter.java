@@ -5,6 +5,9 @@ package com.sepapps.frameshift;
  */
 
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,13 +24,15 @@ public class ShiftAdapter extends BaseAdapter {
     private final LayoutInflater inflater;
     //    private final SimpleDateFormat dayFormat;
     private final Calendar calendar;
-    private Shift[] shifts;
+    private ArrayList<Shift> shifts;
     private ArrayList[] shiftDays;
     private long[] dayStarts;
+    private Context thisContext;
 
     public ShiftAdapter(Context context, Calendar weekCalendar) {
         calendar = weekCalendar;
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        thisContext = context;
     }
 
     @Override
@@ -222,41 +227,43 @@ public class ShiftAdapter extends BaseAdapter {
         calCopy.set(Calendar.MINUTE, 0);
         //pretend to get the shifts from the database
         //there were 4 shifts retrieved, so set the size to 4
-        Shift[] theShifts = new Shift[4];
+//        Shift[] theShifts = new Shift[4];
         //set the dummy times
-        calCopy.set(Calendar.HOUR_OF_DAY, 14);
-        calCopy.set(Calendar.MINUTE, 0);
-        long shiftStart = calCopy.getTimeInMillis();
-        calCopy.set(Calendar.HOUR_OF_DAY, 18);
-        calCopy.set(Calendar.MINUTE, 0);
-        long shiftEnd = calCopy.getTimeInMillis();
-        //create 4 dummy shifts (without ID, it will generate one, subsequently we can get the
-        //id from the database
-        theShifts[0] = new Shift(shiftStart, shiftEnd);
-        calCopy.set(Calendar.HOUR_OF_DAY, 18);
-        calCopy.set(Calendar.MINUTE, 15);
-        shiftStart = calCopy.getTimeInMillis();
-        calCopy.set(Calendar.HOUR_OF_DAY, 20);
-        calCopy.set(Calendar.MINUTE, 0);
-        shiftEnd = calCopy.getTimeInMillis();
-        theShifts[1] = new Shift(shiftStart, shiftEnd);
-        calCopy.add(Calendar.DATE, 1);
-        calCopy.set(Calendar.HOUR_OF_DAY, 0);
-        calCopy.set(Calendar.MINUTE, 30);
-        shiftStart = calCopy.getTimeInMillis();
-        calCopy.set(Calendar.HOUR_OF_DAY, 8);
-        calCopy.set(Calendar.MINUTE, 30);
-        shiftEnd = calCopy.getTimeInMillis();
-        theShifts[2] = new Shift(shiftStart, shiftEnd);
-        calCopy.set(Calendar.HOUR_OF_DAY, 20);
-        calCopy.set(Calendar.MINUTE, 30);
-        shiftStart = calCopy.getTimeInMillis();
-        calCopy.add(Calendar.DATE, 2);
-        calCopy.set(Calendar.HOUR_OF_DAY, 12);
-        calCopy.set(Calendar.MINUTE, 30);
-        shiftEnd = calCopy.getTimeInMillis();
-        theShifts[3] = new Shift(shiftStart, shiftEnd);
+//        calCopy.set(Calendar.HOUR_OF_DAY, 14);
+//        calCopy.set(Calendar.MINUTE, 0);
+//        long shiftStart = calCopy.getTimeInMillis();
+//        calCopy.set(Calendar.HOUR_OF_DAY, 18);
+//        calCopy.set(Calendar.MINUTE, 0);
+//        long shiftEnd = calCopy.getTimeInMillis();
+//        //create 4 dummy shifts (without ID, it will generate one, subsequently we can get the
+//        //id from the database
+//        theShifts[0] = new Shift(shiftStart, shiftEnd);
+//        calCopy.set(Calendar.HOUR_OF_DAY, 18);
+//        calCopy.set(Calendar.MINUTE, 15);
+//        shiftStart = calCopy.getTimeInMillis();
+//        calCopy.set(Calendar.HOUR_OF_DAY, 20);
+//        calCopy.set(Calendar.MINUTE, 0);
+//        shiftEnd = calCopy.getTimeInMillis();
+//        theShifts[1] = new Shift(shiftStart, shiftEnd);
+//        calCopy.add(Calendar.DATE, 1);
+//        calCopy.set(Calendar.HOUR_OF_DAY, 0);
+//        calCopy.set(Calendar.MINUTE, 30);
+//        shiftStart = calCopy.getTimeInMillis();
+//        calCopy.set(Calendar.HOUR_OF_DAY, 8);
+//        calCopy.set(Calendar.MINUTE, 30);
+//        shiftEnd = calCopy.getTimeInMillis();
+//        theShifts[2] = new Shift(shiftStart, shiftEnd);
+//        calCopy.set(Calendar.HOUR_OF_DAY, 20);
+//        calCopy.set(Calendar.MINUTE, 30);
+//        shiftStart = calCopy.getTimeInMillis();
+//        calCopy.add(Calendar.DATE, 2);
+//        calCopy.set(Calendar.HOUR_OF_DAY, 12);
+//        calCopy.set(Calendar.MINUTE, 30);
+//        shiftEnd = calCopy.getTimeInMillis();
+//        theShifts[3] = new Shift(shiftStart, shiftEnd);
 
+
+        ArrayList<Shift> theShifts = this.getShiftsBetween(dayStarts[0], dayStarts[7]);
         this.shifts = theShifts;
         //end of getting shifts from database
 
@@ -268,7 +275,7 @@ public class ShiftAdapter extends BaseAdapter {
             shiftDays[i] = new ArrayList<Shift>();
         }
         //now assign the shifts to the correct day
-        for (int i = 0; i < theShifts.length; i++) {
+        for (int i = 0; i < theShifts.size(); i++) {
             long displayShiftStart;
             long displayShiftEnd;
             //Get the start day and end day of the shift, if they
@@ -280,24 +287,24 @@ public class ShiftAdapter extends BaseAdapter {
                 displayShiftStart = 0;
                 displayShiftEnd = 0;
                 //if the shift started before the start of this day, but finishes after it
-                if ((theShifts[i].getStartTime() < dayStarts[j]) && (theShifts[i].getEndTime() > dayStarts[j])) {
+                if ((theShifts.get(i).getStartTime() < dayStarts[j]) && (theShifts.get(i).getEndTime() > dayStarts[j])) {
                     displayShiftStart = dayStarts[j];
                 }
                 //if the start time is between the start and the end of the day
-                if ((theShifts[i].getStartTime() > dayStarts[j]) && (theShifts[i].getStartTime() < dayStarts[j + 1])) {
-                    displayShiftStart = theShifts[i].getStartTime();
+                if ((theShifts.get(i).getStartTime() > dayStarts[j]) && (theShifts.get(i).getStartTime() < dayStarts[j + 1])) {
+                    displayShiftStart = theShifts.get(i).getStartTime();
                 }
                 //if the shift end time is between the start and end of the day
-                if ((theShifts[i].getEndTime() > dayStarts[j]) && (theShifts[i].getEndTime() < dayStarts[j + 1])) {
-                    displayShiftEnd = theShifts[i].getEndTime();
+                if ((theShifts.get(i).getEndTime() > dayStarts[j]) && (theShifts.get(i).getEndTime() < dayStarts[j + 1])) {
+                    displayShiftEnd = theShifts.get(i).getEndTime();
                 }
                 //if the shift end time is after the end of the day, but started before it
-                if ((theShifts[i].getEndTime() > dayStarts[j + 1]) && (theShifts[i].getStartTime() < dayStarts[j])) {
+                if ((theShifts.get(i).getEndTime() > dayStarts[j + 1]) && (theShifts.get(i).getStartTime() < dayStarts[j])) {
                     displayShiftEnd = (dayStarts[j + 1] - 60000);
                 }
                 // if the shift is for this day, then add it to the array
                 if (displayShiftStart != 0 && displayShiftEnd != 0) {
-                    shiftDays[j].add(new Shift(displayShiftStart, displayShiftEnd, theShifts[i].getId()));
+                    shiftDays[j].add(new Shift(displayShiftStart, displayShiftEnd, theShifts.get(i).getId()));
                 }
             }
 
@@ -305,5 +312,30 @@ public class ShiftAdapter extends BaseAdapter {
         }
 
 
+    }
+
+    private ArrayList<Shift> getShiftsBetween(long weekStart, long weekEnd) {
+        ArrayList<Shift> thisWeeksShifts = new ArrayList<>();
+        try {
+            FrameShiftDatabaseHelper dbHelper = new FrameShiftDatabaseHelper(thisContext);
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+            Cursor cursor = db.query("SHIFT",
+                    new String[]{"_id", "START_TIME", "END_TIME"},
+                    "START_TIME >= ? and END_TIME < ?", new String[]{String.valueOf(weekStart), String.valueOf(weekEnd)}, null, null, null);
+            int id = cursor.getColumnIndex("_id");
+            int startTime = cursor.getColumnIndex("START_TIME");
+            int endTime = cursor.getColumnIndex("END_TIME");
+            while (cursor.moveToNext()) {
+                long longId = cursor.getLong(id);
+                long longStart = cursor.getLong(startTime);
+                long longEnd = cursor.getLong(endTime);
+                thisWeeksShifts.add(new Shift(longStart, longEnd, longId));
+            }
+            return thisWeeksShifts;
+
+        } catch (Exception e) {
+            Log.d("e", e.toString());
+            return thisWeeksShifts;
+        }
     }
 }

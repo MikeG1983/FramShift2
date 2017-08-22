@@ -31,22 +31,11 @@ public class FrameShiftDatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     }
 
-    /**
-     * Inserts a shift into the database with the start time, end time and comment passed in the
-     * parameters
-     * @param db the database
-     */
-    private static void insertShift(SQLiteDatabase db, long startTime, long endTime, String comment) {
-        Cursor cursor = db.query("SHIFT",
-                new String[] {"_id"},
-                "START_TIME>? and START_TIME", null, null, null, null);
-                ContentValues shiftValues = new ContentValues();
-        shiftValues.put("START_TIME", startTime);
-        shiftValues.put("END_TIME", endTime);
-        shiftValues.put("COMMENT", comment);
-        db.insert("SHIFT", null, shiftValues);
+
+
+
 
 
     }
 
-}
+
