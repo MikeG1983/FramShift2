@@ -1,16 +1,16 @@
 package com.sepapps.frameshift;
 
 import android.app.Activity;
-
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.widget.DatePicker;
 
+import java.util.Currency;
 import java.util.Locale;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements DatePickerFragment.DatePickerDialogListener {
     public static int deviceHeight, deviceWidth, actionBarHeight, shiftGridCellHeight, dayGridHeight, navBarHeight;
     public static float deviceDensity;
     public static Locale locale;
@@ -40,6 +40,15 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
     }
-
+    @Override
+    public void onDateSet(int id, DatePicker view, int year, int month, int day) {
+        CalendarView currentCalendarView = (CalendarView) getFragmentManager().findFragmentById(R.id.calendar_fragment);
+        currentCalendarView.calendar.set(year, month, day);
+        currentCalendarView.calendarAdapter.calendar.set(year, month, day);
+        currentCalendarView.calendarAdapter.calendar.getTime();
+        currentCalendarView.shiftAdapter.calendar.set(year, month, day);
+        currentCalendarView.shiftAdapter.calendar.getTime();
+        currentCalendarView.updateCurrentWeek();
+    }
 
 }

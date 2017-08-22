@@ -23,7 +23,7 @@ public class ShiftAdapter extends BaseAdapter {
     //    private final Shift selected;
     private final LayoutInflater inflater;
     //    private final SimpleDateFormat dayFormat;
-    private final Calendar calendar;
+    final Calendar calendar;
     private ArrayList<Shift> shifts;
     private ArrayList[] shiftDays;
     private long[] dayStarts;
@@ -225,43 +225,6 @@ public class ShiftAdapter extends BaseAdapter {
         calCopy.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
         calCopy.set(Calendar.HOUR_OF_DAY, 0);
         calCopy.set(Calendar.MINUTE, 0);
-        //pretend to get the shifts from the database
-        //there were 4 shifts retrieved, so set the size to 4
-//        Shift[] theShifts = new Shift[4];
-        //set the dummy times
-//        calCopy.set(Calendar.HOUR_OF_DAY, 14);
-//        calCopy.set(Calendar.MINUTE, 0);
-//        long shiftStart = calCopy.getTimeInMillis();
-//        calCopy.set(Calendar.HOUR_OF_DAY, 18);
-//        calCopy.set(Calendar.MINUTE, 0);
-//        long shiftEnd = calCopy.getTimeInMillis();
-//        //create 4 dummy shifts (without ID, it will generate one, subsequently we can get the
-//        //id from the database
-//        theShifts[0] = new Shift(shiftStart, shiftEnd);
-//        calCopy.set(Calendar.HOUR_OF_DAY, 18);
-//        calCopy.set(Calendar.MINUTE, 15);
-//        shiftStart = calCopy.getTimeInMillis();
-//        calCopy.set(Calendar.HOUR_OF_DAY, 20);
-//        calCopy.set(Calendar.MINUTE, 0);
-//        shiftEnd = calCopy.getTimeInMillis();
-//        theShifts[1] = new Shift(shiftStart, shiftEnd);
-//        calCopy.add(Calendar.DATE, 1);
-//        calCopy.set(Calendar.HOUR_OF_DAY, 0);
-//        calCopy.set(Calendar.MINUTE, 30);
-//        shiftStart = calCopy.getTimeInMillis();
-//        calCopy.set(Calendar.HOUR_OF_DAY, 8);
-//        calCopy.set(Calendar.MINUTE, 30);
-//        shiftEnd = calCopy.getTimeInMillis();
-//        theShifts[2] = new Shift(shiftStart, shiftEnd);
-//        calCopy.set(Calendar.HOUR_OF_DAY, 20);
-//        calCopy.set(Calendar.MINUTE, 30);
-//        shiftStart = calCopy.getTimeInMillis();
-//        calCopy.add(Calendar.DATE, 2);
-//        calCopy.set(Calendar.HOUR_OF_DAY, 12);
-//        calCopy.set(Calendar.MINUTE, 30);
-//        shiftEnd = calCopy.getTimeInMillis();
-//        theShifts[3] = new Shift(shiftStart, shiftEnd);
-
 
         ArrayList<Shift> theShifts = this.getShiftsBetween(dayStarts[0], dayStarts[7]);
         this.shifts = theShifts;
@@ -281,7 +244,6 @@ public class ShiftAdapter extends BaseAdapter {
             //Get the start day and end day of the shift, if they
             //are the same then add the shift to one day, if they
             //are different then add the shift to each day, for display purposes.
-
             // for each day of the week
             for (int j = 0; j < (dayStarts.length - 1); j++) {
                 displayShiftStart = 0;
@@ -335,7 +297,20 @@ public class ShiftAdapter extends BaseAdapter {
         }
         cursor.close();
         return thisWeeksShifts;
-
     }
+    String getHoursWorked(){
+        long hoursAccumulator = 0L;
+       for (int i = 0; i < this.shifts.size(); i++) {
+           long startTime = this.shifts.get(i).getStartTime();
+           long endTime = this.shifts.get(i).getEndTime();
+           hoursAccumulator += (endTime - startTime);
+       }
+        hoursAccumulator = hoursAccumulator / 60000;
+        long hours = hoursAccumulator / 60;
+        long minutes = hoursAccumulator % 60;
+        String hoursWorked = String.valueOf(hours) + " hours, " + String.valueOf(minutes) + " minutes";
+        return hoursWorked;
+    }
+
 }
 

@@ -11,10 +11,16 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.app.ActionBar;
+import android.support.constraint.ConstraintLayout;
+import android.support.constraint.ConstraintSet;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.LayoutInflater;
@@ -24,19 +30,25 @@ import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
+
+import org.w3c.dom.Text;
 
 public class CalendarView extends Fragment {
     protected final Calendar calendar;
     private ViewSwitcher calendarSwitcher;
     private TextView currentWeek;
-    private CalendarAdapter calendarAdapter;
+    CalendarAdapter calendarAdapter;
     private static long idCounter = 0;
     private GridView shiftGrid;
-    private ShiftAdapter shiftAdapter;
+    ShiftAdapter shiftAdapter;
     private ViewConfiguration viewConfig;
     public static int gmtOffset;
 
@@ -55,7 +67,7 @@ public class CalendarView extends Fragment {
                 calendar.get(Calendar.DAY_OF_MONTH),
                 calendar.get(Calendar.DAY_OF_WEEK),
                 calendar.get(Calendar.MILLISECOND));
-        gmtOffset = gmtOffset / (60*60*1000);
+        gmtOffset = gmtOffset / (60 * 60 * 1000);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.MILLISECOND, 0);
@@ -144,13 +156,13 @@ public class CalendarView extends Fragment {
         calendarAdapter.refreshDays();
         //call the shift adapter method refreshShifts
         shiftAdapter.refreshShifts();
-        // sets the current week in the title
-
-        // set the day to monday (this eventually will be read from user settings.
+        //get the hours worked this week
+        String hoursWorked = shiftAdapter.getHoursWorked();
+// sets the current week in the title
         Calendar calCopy = (Calendar) (calendar.clone());
         long theTime = calCopy.getTimeInMillis();
+        // set the day to monday (this eventually will be read from user settings.
         calCopy.set(Calendar.DAY_OF_WEEK, calCopy.getFirstDayOfWeek());
-        theTime = calCopy.getTimeInMillis();
         String title = "" + calCopy.get(Calendar.DAY_OF_MONTH) + " "
                 + calCopy.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.UK);
         calCopy.add(Calendar.DATE, 6);
@@ -158,8 +170,39 @@ public class CalendarView extends Fragment {
                 + calCopy.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.UK) + " ";
         title += calCopy.get(Calendar.YEAR);
         currentWeek.setText(title);
-//        ActionBar actionBar = getActivity().getActionBar();
-//        actionBar.setTitle(title);
+        currentWeek.setClickable(true);
+        currentWeek.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View ve) {
+                int theYear = calendar.get(Calendar.YEAR);
+                int theMonth = calendar.get(Calendar.MONTH);
+                int theDay = calendar.get(Calendar.DAY_OF_MONTH);
+                DialogFragment newFragment = DatePickerFragment.newInstance(3, theYear, theMonth, theDay);
+                newFragment.show(getFragmentManager(), "DatePicker");
+            }
+        });
+        String hoursWorkedTitle = "Hours worked this week: " + hoursWorked;
+        ActionBar actionBar = getActivity().getActionBar();
+        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        ConstraintLayout actionBarLayout = (ConstraintLayout) inflater.inflate(R.layout.custom_action_bar, null);
+        TextView hoursWorkedTv = (TextView) actionBarLayout.findViewById(R.id.hoursWorked);
+        hoursWorkedTv.setText(hoursWorkedTitle);
+        final ImageView calendarImage = (ImageView) actionBarLayout.findViewById(R.id.calendarIcon);
+        calendarImage.setClickable(true);
+        calendarImage.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View ve) {
+                int theYear = calendar.get(Calendar.YEAR);
+                int theMonth = calendar.get(Calendar.MONTH);
+                int theDay = calendar.get(Calendar.DAY_OF_MONTH);
+                DialogFragment newFragment = DatePickerFragment.newInstance(3, theYear, theMonth, theDay);
+                newFragment.show(getFragmentManager(), "DatePicker");
+            }
+        });
+
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+        actionBar.setCustomView(actionBarLayout);
+
+
+//        actionBar.setTitle(hoursWorkedTitle);
 
     }
 
@@ -214,7 +257,7 @@ public class CalendarView extends Fragment {
     }
 
 
-    public static synchronized Long createID() {
+    public static synchronized long createID() {
         return idCounter++;
     }
 }

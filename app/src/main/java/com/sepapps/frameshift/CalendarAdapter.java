@@ -18,7 +18,7 @@ import android.widget.TextView;
 
 public class CalendarAdapter extends BaseAdapter {
     private static final int FIRST_DAY_OF_WEEK = Calendar.MONDAY;
-    private final Calendar calendar;
+    final Calendar calendar;
     private final Locale locale;
     private final CalendarDay today;
     //    private final Shift selected;
