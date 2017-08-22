@@ -271,7 +271,7 @@ public class EnterShift extends Activity
             SQLiteDatabase db = dbHelper.getWritableDatabase();
             Cursor cursor = db.query("SHIFT",
                     new String[]{"_id"},
-                    "START_TIME < ? and END_TIME > ?", new String[]{String.valueOf(shiftEndLong), String.valueOf(shiftStartLong)}, null, null, null);
+                    "START_TIME < ? and END_TIME > ? and _id != ?", new String[]{String.valueOf(shiftEndLong), String.valueOf(shiftStartLong), String.valueOf(shiftID)}, null, null, null);
             if (cursor.getCount() <= 0) { //if there is no conflicting shift
                 cursor.close();
                 ContentValues shiftValues = new ContentValues();
@@ -281,7 +281,7 @@ public class EnterShift extends Activity
                 // do the update
                 db.update("SHIFT",
                         shiftValues,
-                        "id = ?",
+                        "_id = ?",
                         new String[]{String.valueOf(shiftID)}
                 );
                 Intent intent = new Intent(this, MainActivity.class);
